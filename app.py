@@ -381,14 +381,21 @@ def inventory():
 def add_inventory_item():
     """Add new inventory item"""
     if request.method == 'POST':
+        # Handle empty string values for numeric fields
+        unit_cost = request.form.get('unit_cost', '0').strip()
+        current_stock = request.form.get('current_stock', '0').strip()
+        minimum_stock = request.form.get('minimum_stock', '0').strip()
+        charge_price = request.form.get('charge_price', '0').strip()
+        
         item = InventoryItem(
             name=request.form.get('name'),
             description=request.form.get('description'),
             category=request.form.get('category'),
             unit=request.form.get('unit'),
-            unit_cost=float(request.form.get('unit_cost', 0)),
-            current_stock=float(request.form.get('current_stock', 0)),
-            minimum_stock=float(request.form.get('minimum_stock', 0)),
+            unit_cost=float(unit_cost) if unit_cost else 0.0,
+            current_stock=float(current_stock) if current_stock else 0.0,
+            minimum_stock=float(minimum_stock) if minimum_stock else 0.0,
+            charge_price=float(charge_price) if charge_price else 0.0,
             supplier=request.form.get('supplier'),
             supplier_code=request.form.get('supplier_code')
         )
@@ -439,6 +446,7 @@ def import_inventory_csv():
                             category=row.get('category', '').strip().lower(),
                             unit=row.get('unit', '').strip(),
                             unit_cost=float(row.get('unit_cost', 0) or 0),
+                            charge_price=float(row.get('charge_price', 0) or 0),
                             current_stock=float(row.get('current_stock', 0) or 0),
                             minimum_stock=float(row.get('minimum_stock', 0) or 0),
                             supplier=row.get('supplier', '').strip() or None,

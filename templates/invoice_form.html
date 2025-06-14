@@ -65,9 +65,9 @@
                                     {% for item in inventory_items %}
                                     <option value="{{ item.id }}" 
                                             data-description="{{ item.name }} - {{ item.description or '' }}"
-                                            data-price="{{ item.unit_cost }}"
+                                            data-price="{{ item.charge_price }}"
                                             data-unit="{{ item.unit }}">
-                                        {{ item.name }} ({{ item.unit_cost | nz_currency }}/{{ item.unit }})
+                                        {{ item.name }} ({{ item.charge_price | nz_currency }}/{{ item.unit }})
                                     </option>
                                     {% endfor %}
                                 </select>

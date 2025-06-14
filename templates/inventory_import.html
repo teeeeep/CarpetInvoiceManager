@@ -60,7 +60,7 @@
                     <p class="mb-3">Your CSV file must include the following columns (header row required):</p>
                     
                     <div class="bg-white rounded border p-3 mb-3">
-                        <code class="text-xs">name,description,category,unit,unit_cost,current_stock,minimum_stock,supplier,supplier_code</code>
+                        <code class="text-xs">name,description,category,unit,unit_cost,charge_price,current_stock,minimum_stock,supplier,supplier_code</code>
                     </div>
 
                     <p class="font-medium mb-2">Required columns:</p>
@@ -73,7 +73,8 @@
                     <p class="font-medium mb-2">Optional columns:</p>
                     <ul class="list-disc pl-5 space-y-1">
                         <li><strong>description</strong> - Item description</li>
-                        <li><strong>unit_cost</strong> - Cost per unit in NZD (default: 0)</li>
+                        <li><strong>unit_cost</strong> - What you pay per unit in NZD (default: 0)</li>
+                        <li><strong>charge_price</strong> - What you charge customers per unit in NZD (default: 0)</li>
                         <li><strong>current_stock</strong> - Current stock level (default: 0)</li>
                         <li><strong>minimum_stock</strong> - Minimum stock alert level (default: 0)</li>
                         <li><strong>supplier</strong> - Supplier name</li>
@@ -135,12 +136,12 @@
     // Generate and download sample CSV
     function downloadSampleCSV() {
         const sampleData = [
-            ['name', 'description', 'category', 'unit', 'unit_cost', 'current_stock', 'minimum_stock', 'supplier', 'supplier_code'],
-            ['Wool Carpet - Beige', 'High-quality wool carpet for residential areas', 'carpet', 'm²', '45.50', '100', '20', 'Auckland Carpet Supplies', 'WC-BG-001'],
-            ['Carpet Underlay', 'Standard underlay for carpet installation', 'underlay', 'm²', '12.00', '150', '30', 'Auckland Carpet Supplies', 'UL-STD-001'],
-            ['Carpet Adhesive', 'Professional grade carpet adhesive', 'adhesive', 'litres', '28.50', '25', '5', 'Builder Supplies Ltd', 'ADH-PRO-500'],
-            ['Carpet Knife', 'Professional carpet cutting knife', 'tools', 'pieces', '35.00', '5', '2', 'Tool Depot', 'TK-PRO-001'],
-            ['Carpet Strips', 'Transition strips for carpet edges', 'supplies', 'm', '8.75', '50', '10', 'Flooring Solutions', 'CS-2M-001']
+            ['name', 'description', 'category', 'unit', 'unit_cost', 'charge_price', 'current_stock', 'minimum_stock', 'supplier', 'supplier_code'],
+            ['Wool Carpet - Beige', 'High-quality wool carpet for residential areas', 'carpet', 'm²', '45.50', '65.00', '100', '20', 'Auckland Carpet Supplies', 'WC-BG-001'],
+            ['Carpet Underlay', 'Standard underlay for carpet installation', 'underlay', 'm²', '12.00', '18.00', '150', '30', 'Auckland Carpet Supplies', 'UL-STD-001'],
+            ['Carpet Adhesive', 'Professional grade carpet adhesive', 'adhesive', 'litres', '28.50', '45.00', '25', '5', 'Builder Supplies Ltd', 'ADH-PRO-500'],
+            ['Carpet Knife', 'Professional carpet cutting knife', 'tools', 'pieces', '35.00', '50.00', '5', '2', 'Tool Depot', 'TK-PRO-001'],
+            ['Carpet Strips', 'Transition strips for carpet edges', 'supplies', 'm', '8.75', '15.00', '50', '10', 'Flooring Solutions', 'CS-2M-001']
         ];
 
         const csvContent = sampleData.map(row => row.join(',')).join('\n');

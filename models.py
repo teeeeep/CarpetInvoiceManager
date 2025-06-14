@@ -93,7 +93,8 @@ class InventoryItem(db.Model):
     description = db.Column(db.String(500))
     category = db.Column(db.String(100), nullable=False)  # carpet, underlay, tools, adhesive, etc.
     unit = db.Column(db.String(50), nullable=False)  # m², linear metres, pieces, litres, etc.
-    unit_cost = db.Column(db.Float, nullable=False, default=0.0)
+    unit_cost = db.Column(db.Float, nullable=False, default=0.0)  # What you pay for the item
+    charge_price = db.Column(db.Float, nullable=False, default=0.0)  # What you charge customers
     current_stock = db.Column(db.Float, nullable=False, default=0.0)
     minimum_stock = db.Column(db.Float, nullable=False, default=0.0)
     supplier = db.Column(db.String(200))
