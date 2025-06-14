@@ -39,7 +39,11 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Active Jobs</p>
                 <p class="text-2xl font-bold text-gray-900">
-                    {{ retailers|sum(attribute='jobs')|length if retailers else 0 }}
+                    {% set total_jobs = 0 %}
+                    {% for retailer in retailers %}
+                        {% set total_jobs = total_jobs + retailer.jobs|length %}
+                    {% endfor %}
+                    {{ total_jobs }}
                 </p>
             </div>
         </div>
@@ -53,7 +57,13 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Invoices</p>
                 <p class="text-2xl font-bold text-gray-900">
-                    {{ retailers|sum(attribute='jobs')|sum(attribute='invoices')|length if retailers else 0 }}
+                    {% set total_invoices = 0 %}
+                    {% for retailer in retailers %}
+                        {% for job in retailer.jobs %}
+                            {% set total_invoices = total_invoices + job.invoices|length %}
+                        {% endfor %}
+                    {% endfor %}
+                    {{ total_invoices }}
                 </p>
             </div>
         </div>
@@ -128,7 +138,10 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">
-                                {% set invoice_count = retailer.jobs|sum(attribute='invoices')|length %}
+                                {% set invoice_count = 0 %}
+                                {% for job in retailer.jobs %}
+                                    {% set invoice_count = invoice_count + job.invoices|length %}
+                                {% endfor %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                     {% if invoice_count > 0 %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
                                     {{ invoice_count }} invoices

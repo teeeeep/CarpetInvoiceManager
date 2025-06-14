@@ -24,7 +24,7 @@
                        required
                        class="form-input touch-input"
                        placeholder="e.g., Carpet Plus Auckland"
-                       value="{{ request.form.name if request.form.name else '' }}">
+                       value="{{ request.form.get('name', '') }}">
                 <p class="mt-1 text-sm text-gray-500">The business name of the carpet retailer</p>
             </div>
 
@@ -39,7 +39,7 @@
                        required
                        class="form-input touch-input"
                        placeholder="e.g., admin@carpetplus.co.nz"
-                       value="{{ request.form.email if request.form.email else '' }}">
+                       value="{{ request.form.get('email', '') }}">
                 <p class="mt-1 text-sm text-gray-500">Primary contact email for invoices and communications</p>
             </div>
 
@@ -54,7 +54,7 @@
                        required
                        class="form-input touch-input"
                        placeholder="e.g., 09-123-4567"
-                       value="{{ request.form.phone if request.form.phone else '' }}">
+                       value="{{ request.form.get('phone', '') }}">
                 <p class="mt-1 text-sm text-gray-500">Contact phone number in New Zealand format</p>
             </div>
 

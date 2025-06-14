@@ -29,7 +29,7 @@
                            required
                            class="form-input touch-input"
                            placeholder="e.g., 123 Queen Street"
-                           value="{{ request.form.street_address if request.form.street_address else '' }}">
+                           value="{{ request.form.get('street_address', '') }}">
                     <p class="mt-1 text-sm text-gray-500">Include unit/apartment number if applicable</p>
                 </div>
 
@@ -45,7 +45,7 @@
                                required
                                class="form-input touch-input"
                                placeholder="e.g., Auckland Central"
-                               value="{{ request.form.suburb if request.form.suburb else '' }}">
+                               value="{{ request.form.get('suburb', '') }}">
                     </div>
 
                     <!-- Town/City -->
@@ -59,7 +59,7 @@
                                required
                                class="form-input touch-input"
                                placeholder="e.g., Auckland"
-                               value="{{ request.form.town_city if request.form.town_city else '' }}">
+                               value="{{ request.form.get('town_city', '') }}">
                     </div>
                 </div>
             </div>
@@ -80,7 +80,7 @@
                         <option value="">Choose a retailer...</option>
                         {% for retailer in retailers %}
                         <option value="{{ retailer.id }}" 
-                                {% if request.form.retailer_id|int == retailer.id %}selected{% endif %}>
+                                {% if request.form.get('retailer_id') and request.form.get('retailer_id')|int == retailer.id %}selected{% endif %}>
                             {{ retailer.name }} ({{ retailer.email }})
                         </option>
                         {% endfor %}
