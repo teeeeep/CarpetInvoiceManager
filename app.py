@@ -76,11 +76,23 @@ def index():
     total_jobs = db.session.query(Job).count()
     total_retailers = db.session.query(Retailer).count()
     
+    # Get inventory stats
+    total_inventory_items = db.session.query(InventoryItem).filter_by(is_active=True).count()
+    low_stock_items = db.session.query(InventoryItem).filter_by(is_active=True).filter(
+        InventoryItem.current_stock <= InventoryItem.minimum_stock
+    ).count()
+    total_inventory_value = db.session.query(
+        db.func.sum(InventoryItem.current_stock * InventoryItem.unit_cost)
+    ).filter_by(is_active=True).scalar() or 0
+    
     return render_template('index.html', 
                          recent_invoices=recent_invoices,
                          total_invoices=total_invoices,
                          total_jobs=total_jobs,
-                         total_retailers=total_retailers)
+                         total_retailers=total_retailers,
+                         total_inventory_items=total_inventory_items,
+                         low_stock_items=low_stock_items,
+                         total_inventory_value=total_inventory_value)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

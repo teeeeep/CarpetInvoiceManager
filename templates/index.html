@@ -10,7 +10,7 @@
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
             <div class="p-3 rounded-full bg-blue-100">
@@ -43,6 +43,30 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Retailers</p>
                 <p class="text-2xl font-bold text-gray-900">{{ total_retailers }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-indigo-100">
+                <i data-feather="package" class="h-8 w-8 text-indigo-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Inventory Items</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_inventory_items }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full {% if low_stock_items > 0 %}bg-orange-100{% else %}bg-gray-100{% endif %}">
+                <i data-feather="alert-triangle" class="h-8 w-8 {% if low_stock_items > 0 %}text-orange-600{% else %}text-gray-600{% endif %}"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Low Stock</p>
+                <p class="text-2xl font-bold {% if low_stock_items > 0 %}text-orange-600{% else %}text-gray-900{% endif %}">{{ low_stock_items }}</p>
             </div>
         </div>
     </div>
