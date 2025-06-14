@@ -104,7 +104,9 @@ Comprehensive environment variables for:
 ## Changelog
 
 - June 14, 2025. Initial setup
+- June 14, 2025. Added simplified inventory system with CSV import and invoice integration
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Inventory requirements: Focus on invoice integration with pre-populated prices and CSV import rather than complex stock tracking.
