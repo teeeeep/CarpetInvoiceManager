@@ -60,8 +60,19 @@
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
                             <div class="lg:col-span-5">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <select class="form-select touch-input mb-2 inventory-select" onchange="populateFromInventory(this)">
+                                    <option value="">Select from inventory (optional)</option>
+                                    {% for item in inventory_items %}
+                                    <option value="{{ item.id }}" 
+                                            data-description="{{ item.name }} - {{ item.description or '' }}"
+                                            data-price="{{ item.unit_cost }}"
+                                            data-unit="{{ item.unit }}">
+                                        {{ item.name }} ({{ item.unit_cost | nz_currency }}/{{ item.unit }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
                                 <textarea name="description[]" rows="2" 
-                                         class="form-textarea touch-input" 
+                                         class="form-textarea touch-input description-field" 
                                          placeholder="e.g., Carpet installation - master bedroom"
                                          required></textarea>
                             </div>

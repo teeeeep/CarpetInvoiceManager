@@ -189,7 +189,10 @@ def add_invoice(job_id):
         flash('Job not found!', 'error')
         return redirect(url_for('jobs'))
     
-    return render_template('invoice_form.html', job=job)
+    # Get inventory items for selection
+    inventory_items = db.session.query(InventoryItem).filter_by(is_active=True).all()
+    
+    return render_template('invoice_form.html', job=job, inventory_items=inventory_items)
 
 @app.route('/invoice/create', methods=['POST'])
 @login_required
