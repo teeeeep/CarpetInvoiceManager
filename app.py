@@ -76,19 +76,17 @@ def generate_invoice_code(invoice_id, street_address, retailer_name, homeowner_n
     else:
         homeowner_initials = "XX"
 
-    # Get the next sequential number for this tax year and initials combination
+    # Generate base code without sequential number
     base_code = f"{tax_year}{retailer_initials}{homeowner_initials}"
 
-    # Find the highest existing sequential number for this base code
-    existing_invoices = db.session.query(Invoice).filter(
-        Invoice.invoice_code.like(f"{base_code}%")
-    ).all()
+    # Find the highest existing sequential number across ALL invoices
+    existing_invoices = db.session.query(Invoice).all()
 
     max_seq = 0
     for invoice in existing_invoices:
-        # Extract the sequential number (last 3 digits)
-        if len(invoice.invoice_code) >= len(base_code) + 3:
-            seq_part = invoice.invoice_code[len(base_code):]
+        # Extract the sequential number (last 3 digits of any invoice code)
+        if len(invoice.invoice_code) >= 3:
+            seq_part = invoice.invoice_code[-3:]  # Get last 3 characters
             if seq_part.isdigit():
                 max_seq = max(max_seq, int(seq_part))
 
