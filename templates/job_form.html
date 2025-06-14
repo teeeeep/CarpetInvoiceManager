@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Add Job - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Add New Installation Job</h1>
+        <p class="mt-2 text-gray-600">Create a new carpet installation job record</p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-lg shadow">
+        <form action="{{ url_for('add_job') }}" method="POST" class="p-6 space-y-6">
+            
+            <!-- Property Address Section -->
+            <div class="border-b pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Property Address</h3>
+                
+                <!-- Street Address -->
+                <div class="mb-4">
+                    <label for="street_address" class="block text-sm font-medium text-gray-700 mb-2">
+                        Street Address <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="street_address" 
+                           name="street_address" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., 123 Queen Street"
+                           value="{{ request.form.street_address if request.form.street_address else '' }}">
+                    <p class="mt-1 text-sm text-gray-500">Include unit/apartment number if applicable</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Suburb -->
+                    <div>
+                        <label for="suburb" class="block text-sm font-medium text-gray-700 mb-2">
+                            Suburb <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="suburb" 
+                               name="suburb" 
+                               required
+                               class="form-input touch-input"
+                               placeholder="e.g., Auckland Central"
+                               value="{{ request.form.suburb if request.form.suburb else '' }}">
+                    </div>
+
+                    <!-- Town/City -->
+                    <div>
+                        <label for="town_city" class="block text-sm font-medium text-gray-700 mb-2">
+                            Town/City <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="town_city" 
+                               name="town_city" 
+                               required
+                               class="form-input touch-input"
+                               placeholder="e.g., Auckland"
+                               value="{{ request.form.town_city if request.form.town_city else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retailer Section -->
+            <div class="border-b pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Retailer Information</h3>
+                
+                <!-- Retailer Selection -->
+                <div>
+                    <label for="retailer_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Select Retailer <span class="text-red-500">*</span>
+                    </label>
+                    <select id="retailer_id" 
+                            name="retailer_id" 
+                            required
+                            class="form-select touch-input">
+                        <option value="">Choose a retailer...</option>
+                        {% for retailer in retailers %}
+                        <option value="{{ retailer.id }}" 
+                                {% if request.form.retailer_id|int == retailer.id %}selected{% endif %}>
+                            {{ retailer.name }} ({{ retailer.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">
+                        {% if not retailers %}
+                        <span class="text-red-600">No retailers available. </span>
+                        <a href="{{ url_for('add_retailer') }}" class="text-blue-600 hover:text-blue-800">Add one first</a>
+                        {% else %}
+                        Select the retailer partner for this installation
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Homeowner Section -->
+            <div class="border-b pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Homeowner Details</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Homeowner Name -->
+                    <div>
+                        <label for="homeowner_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Homeowner Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="homeowner_name" 
+                               name="homeowner_name" 
+                               required
+                               class="form-input touch-input"
+                               placeholder="e.g., John Smith"
+                               value="{{ request.form.homeowner_name if request.form.homeowner_name else '' }}">
+                    </div>
+
+                    <!-- Homeowner Phone -->
+                    <div>
+                        <label for="homeowner_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                            Phone Number <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" 
+                               id="homeowner_phone" 
+                               name="homeowner_phone" 
+                               required
+                               class="form-input touch-input"
+                               placeholder="e.g., 021-123-4567"
+                               value="{{ request.form.homeowner_phone if request.form.homeowner_phone else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Details Section -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Job Details</h3>
+                
+                <!-- Date Completed -->
+                <div>
+                    <label for="date_completed" class="block text-sm font-medium text-gray-700 mb-2">
+                        Date Completed <span class="text-red-500">*</span>
+                    </label>
+                    <input type="date" 
+                           id="date_completed" 
+                           name="date_completed" 
+                           required
+                           class="form-input touch-input"
+                           value="{{ request.form.date_completed if request.form.date_completed else '' }}">
+                    <p class="mt-1 text-sm text-gray-500">The date when the carpet installation was completed</p>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                <a href="{{ url_for('jobs') }}" class="btn-secondary text-center">
+                    <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary" {% if not retailers %}disabled{% endif %}>
+                    <i data-feather="save" class="inline h-4 w-4 mr-2"></i>
+                    Save Job
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Card -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="info" class="h-5 w-5 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Tips for Adding Jobs</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Ensure the address matches the installation location exactly</li>
+                        <li>Use the full name of the homeowner for accurate invoicing</li>
+                        <li>Include area code for mobile numbers (e.g., 021, 027)</li>
+                        <li>Date completed should be the actual completion date</li>
+                        <li>Double-check retailer selection for proper billing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="check-circle" class="h-5 w-5 text-green-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">After Adding This Job</h3>
+                <div class="mt-2 text-sm text-green-700">
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li>Review the job details in the jobs list</li>
+                        <li>Create an invoice for the completed work</li>
+                        <li>Add line items for materials and labour</li>
+                        <li>Generate PDF and send to the retailer</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    // Auto-focus the street address field
+    document.getElementById('street_address').focus();
+    
+    // Set default date to today
+    document.getElementById('date_completed').valueAsDate = new Date();
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const streetAddress = document.getElementById('street_address').value.trim();
+        const suburb = document.getElementById('suburb').value.trim();
+        const townCity = document.getElementById('town_city').value.trim();
+        const retailerId = document.getElementById('retailer_id').value;
+        const homeownerName = document.getElementById('homeowner_name').value.trim();
+        const homeownerPhone = document.getElementById('homeowner_phone').value.trim();
+        const dateCompleted = document.getElementById('date_completed').value;
+        
+        if (!streetAddress || !suburb || !townCity || !retailerId || !homeownerName || !homeownerPhone || !dateCompleted) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        // Check if date is not in the future
+        const selectedDate = new Date(dateCompleted);
+        const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
+        
+        if (selectedDate > today) {
+            e.preventDefault();
+            alert('Date completed cannot be in the future.');
+            document.getElementById('date_completed').focus();
+            return;
+        }
+        
+        // Add loading state to button
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Saving...';
+        
+        // Re-enable button after 10 seconds as fallback
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            feather.replace();
+        }, 10000);
+    });
+    
+    // Format phone number as user types
+    document.getElementById('homeowner_phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Format as XXX-XXX-XXXX for NZ numbers
+        if (value.length >= 6) {
+            value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6, 10);
+        } else if (value.length >= 4) {
+            value = value.substring(0, 3) + '-' + value.substring(3);
+        }
+        
+        e.target.value = value;
+    });
+    
+    // Auto-complete suburb based on town/city
+    const suburbInput = document.getElementById('suburb');
+    const townCityInput = document.getElementById('town_city');
+    
+    townCityInput.addEventListener('blur', function() {
+        const city = this.value.toLowerCase();
+        if (city === 'auckland' && !suburbInput.value) {
+            suburbInput.focus();
+            suburbInput.placeholder = 'e.g., Auckland Central, Ponsonby, Parnell';
+        } else if (city === 'wellington' && !suburbInput.value) {
+            suburbInput.focus();
+            suburbInput.placeholder = 'e.g., Wellington Central, Thorndon, Kelburn';
+        } else if (city === 'christchurch' && !suburbInput.value) {
+            suburbInput.focus();
+            suburbInput.placeholder = 'e.g., Christchurch Central, Riccarton, Fendalton';
+        }
+    });
+    
+    // Address validation helper
+    function validateNZAddress() {
+        const streetAddress = document.getElementById('street_address').value;
+        const hasNumber = /\d/.test(streetAddress);
+        
+        if (streetAddress && !hasNumber) {
+            alert('Street address should include a street number (e.g., "123 Queen Street")');
+            return false;
+        }
+        return true;
+    }
+    
+    document.getElementById('street_address').addEventListener('blur', validateNZAddress);
+</script>
+{% endblock %}

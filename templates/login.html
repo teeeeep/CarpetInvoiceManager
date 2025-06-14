@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 flex items-center justify-center rounded-full bg-gray-800 mb-4">
+                <i data-feather="file-text" class="h-8 w-8 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900">
+                Sign in to Carpet Invoices
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+                Professional carpet installation invoicing for New Zealand
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" action="{{ url_for('login') }}" method="POST">
+            <div class="space-y-4">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-feather="user" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <input id="username" name="username" type="text" required 
+                               class="form-input pl-10 touch-input" 
+                               placeholder="Enter your username"
+                               autocomplete="username">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="mt-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-feather="lock" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required 
+                               class="form-input pl-10 touch-input" 
+                               placeholder="Enter your password"
+                               autocomplete="current-password">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full btn-primary">
+                    <i data-feather="log-in" class="inline h-4 w-4 mr-2"></i>
+                    Sign In
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-xs text-gray-500">
+                    Default credentials: admin / admin123
+                </p>
+            </div>
+        </form>
+        
+        <!-- Features -->
+        <div class="mt-8 border-t pt-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">Why Carpet Invoices?</h3>
+            <div class="grid grid-cols-1 gap-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i data-feather="smartphone" class="h-5 w-5 text-blue-600 mt-1"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Touch-Friendly</p>
+                        <p class="text-xs text-gray-500">Optimised for mobile and tablet use</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i data-feather="wifi-off" class="h-5 w-5 text-green-600 mt-1"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Works Offline</p>
+                        <p class="text-xs text-gray-500">Create invoices even without internet</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i data-feather="map-pin" class="h-5 w-5 text-purple-600 mt-1"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">New Zealand Ready</p>
+                        <p class="text-xs text-gray-500">GST calculation and NZ dollar formatting</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    // Auto-focus username field
+    document.getElementById('username').focus();
+    
+    // Add loading state to form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Signing In...';
+        
+        // Re-enable button after 5 seconds as fallback
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            feather.replace();
+        }, 5000);
+    });
+</script>
+{% endblock %}

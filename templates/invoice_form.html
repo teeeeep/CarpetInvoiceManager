@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Create Invoice - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Create Invoice</h1>
+        <p class="mt-2 text-gray-600">Generate a new invoice for {{ job.homeowner_name }} at {{ job.full_address }}</p>
+    </div>
+
+    <!-- Job Details Card -->
+    <div class="bg-white rounded-lg shadow mb-6">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Job Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="font-medium text-gray-700">Property:</span>
+                    <span class="text-gray-900">{{ job.full_address }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Homeowner:</span>
+                    <span class="text-gray-900">{{ job.homeowner_name }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Phone:</span>
+                    <span class="text-gray-900">{{ job.homeowner_phone }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Retailer:</span>
+                    <span class="text-gray-900">{{ job.retailer.name }}</span>
+                </div>
+                <div>
+                    <span class="font-medium text-gray-700">Date Completed:</span>
+                    <span class="text-gray-900">{{ job.date_completed | nz_date }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Form -->
+    <form action="{{ url_for('create_invoice') }}" method="POST" class="space-y-6">
+        <input type="hidden" name="job_id" value="{{ job.id }}">
+        
+        <!-- Invoice Lines -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Invoice Items</h2>
+                    <button type="button" id="add-line" class="btn-secondary">
+                        <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+                        Add Item
+                    </button>
+                </div>
+                
+                <div id="invoice-lines" class="space-y-4">
+                    <!-- Initial line item -->
+                    <div class="invoice-line p-4 border border-gray-200 rounded-lg">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                            <div class="lg:col-span-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea name="description[]" rows="2" 
+                                         class="form-textarea touch-input" 
+                                         placeholder="e.g., Carpet installation - master bedroom"
+                                         required></textarea>
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (NZD)</label>
+                                <input type="number" name="unit_price[]" step="0.01" min="0" 
+                                       class="form-input touch-input unit-price" 
+                                       placeholder="0.00" required>
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                <input type="number" name="quantity[]" min="1" 
+                                       class="form-input touch-input quantity" 
+                                       placeholder="1" value="1" required>
+                            </div>
+                            <div class="lg:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Line Total</label>
+                                <div class="form-input bg-gray-50 line-total font-medium">$0.00</div>
+                            </div>
+                            <div class="lg:col-span-1 flex items-end">
+                                <button type="button" class="remove-line text-red-600 hover:text-red-800 p-2" style="display: none;">
+                                    <i data-feather="trash-2" class="h-5 w-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Totals -->
+                <div class="mt-6 border-t pt-6">
+                    <div class="flex justify-end">
+                        <div class="w-full max-w-xs space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="font-medium text-gray-700">Subtotal:</span>
+                                <span id="subtotal" class="font-medium">$0.00 NZD</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="font-medium text-gray-700">GST (15%):</span>
+                                <span id="gst-amount" class="font-medium">$0.00 NZD</span>
+                            </div>
+                            <div class="flex justify-between text-lg font-bold border-t pt-2">
+                                <span>Total:</span>
+                                <span id="total" class="text-blue-600">$0.00 NZD</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-end">
+            <a href="{{ url_for('jobs') }}" class="btn-secondary text-center">
+                <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                Back to Jobs
+            </a>
+            <button type="submit" class="btn-primary">
+                <i data-feather="file-text" class="inline h-4 w-4 mr-2"></i>
+                Create Invoice
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let lineCounter = 1;
+        
+        // Add new line item
+        document.getElementById('add-line').addEventListener('click', function() {
+            lineCounter++;
+            const linesContainer = document.getElementById('invoice-lines');
+            const newLine = createInvoiceLine();
+            linesContainer.appendChild(newLine);
+            feather.replace();
+            updateRemoveButtons();
+        });
+        
+        // Create new invoice line element
+        function createInvoiceLine() {
+            const div = document.createElement('div');
+            div.className = 'invoice-line p-4 border border-gray-200 rounded-lg';
+            div.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+                    <div class="lg:col-span-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea name="description[]" rows="2" 
+                                 class="form-textarea touch-input" 
+                                 placeholder="e.g., Carpet installation - living room"></textarea>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (NZD)</label>
+                        <input type="number" name="unit_price[]" step="0.01" min="0" 
+                               class="form-input touch-input unit-price" 
+                               placeholder="0.00">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                        <input type="number" name="quantity[]" min="1" 
+                               class="form-input touch-input quantity" 
+                               placeholder="1" value="1">
+                    </div>
+                    <div class="lg:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Line Total</label>
+                        <div class="form-input bg-gray-50 line-total font-medium">$0.00</div>
+                    </div>
+                    <div class="lg:col-span-1 flex items-end">
+                        <button type="button" class="remove-line text-red-600 hover:text-red-800 p-2">
+                            <i data-feather="trash-2" class="h-5 w-5"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for calculations
+            const unitPrice = div.querySelector('.unit-price');
+            const quantity = div.querySelector('.quantity');
+            const removeBtn = div.querySelector('.remove-line');
+            
+            unitPrice.addEventListener('input', calculateTotals);
+            quantity.addEventListener('input', calculateTotals);
+            removeBtn.addEventListener('click', function() {
+                div.remove();
+                updateRemoveButtons();
+                calculateTotals();
+            });
+            
+            return div;
+        }
+        
+        // Update remove button visibility
+        function updateRemoveButtons() {
+            const lines = document.querySelectorAll('.invoice-line');
+            lines.forEach((line, index) => {
+                const removeBtn = line.querySelector('.remove-line');
+                removeBtn.style.display = lines.length > 1 ? 'block' : 'none';
+            });
+        }
+        
+        // Calculate line totals and invoice totals
+        function calculateTotals() {
+            let subtotal = 0;
+            
+            document.querySelectorAll('.invoice-line').forEach(line => {
+                const unitPrice = parseFloat(line.querySelector('.unit-price').value) || 0;
+                const quantity = parseInt(line.querySelector('.quantity').value) || 0;
+                const lineTotal = unitPrice * quantity;
+                
+                line.querySelector('.line-total').textContent = formatCurrency(lineTotal);
+                subtotal += lineTotal;
+            });
+            
+            const gstAmount = subtotal * 0.15;
+            const total = subtotal + gstAmount;
+            
+            document.getElementById('subtotal').textContent = formatCurrency(subtotal) + ' NZD';
+            document.getElementById('gst-amount').textContent = formatCurrency(gstAmount) + ' NZD';
+            document.getElementById('total').textContent = formatCurrency(total) + ' NZD';
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return '$' + amount.toFixed(2);
+        }
+        
+        // Add event listeners to initial line
+        document.querySelector('.unit-price').addEventListener('input', calculateTotals);
+        document.querySelector('.quantity').addEventListener('input', calculateTotals);
+        
+        // Initialize
+        updateRemoveButtons();
+        calculateTotals();
+        feather.replace();
+    });
+</script>
+{% endblock %}

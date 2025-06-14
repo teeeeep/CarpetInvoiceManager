@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}Invoices - Carpet Invoices{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Invoices</h1>
+        <p class="mt-2 text-gray-600">Manage all your carpet installation invoices</p>
+    </div>
+    <div class="mt-4 sm:mt-0">
+        <a href="{{ url_for('jobs') }}" class="btn-primary">
+            <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+            Create Invoice
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100">
+                <i data-feather="file-text" class="h-6 w-6 text-blue-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Invoices</p>
+                <p class="text-2xl font-bold text-gray-900">{{ invoices|length }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100">
+                <i data-feather="check-circle" class="h-6 w-6 text-green-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Paid</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {{ invoices|selectattr('status', 'equalto', 'paid')|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-orange-100">
+                <i data-feather="send" class="h-6 w-6 text-orange-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Sent</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {{ invoices|selectattr('status', 'equalto', 'sent')|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-100">
+                <i data-feather="edit" class="h-6 w-6 text-yellow-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Draft</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {{ invoices|selectattr('status', 'equalto', 'draft')|list|length }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Total Revenue Card -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow p-6 mb-8 text-white">
+    <div class="flex items-center justify-between">
+        <div>
+            <h3 class="text-lg font-medium">Total Revenue</h3>
+            <p class="text-3xl font-bold mt-2">
+                {% set total_revenue = invoices|sum(attribute='total') %}
+                {{ total_revenue | nz_currency }}
+            </p>
+            <p class="text-blue-100 text-sm mt-1">
+                From {{ invoices|length }} invoices
+            </p>
+        </div>
+        <div class="p-3 bg-blue-500 rounded-full">
+            <i data-feather="dollar-sign" class="h-8 w-8"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Invoices List -->
+<div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">All Invoices</h2>
+            <div class="flex space-x-2">
+                <!-- Filter buttons could go here -->
+            </div>
+        </div>
+        
+        {% if invoices %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Invoice
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Property
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Homeowner
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Retailer
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for invoice in invoices %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ invoice.invoice_code }}</div>
+                            <div class="text-sm text-gray-500">ID: {{ invoice.id }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ invoice.job.street_address }}</div>
+                            <div class="text-sm text-gray-500">{{ invoice.job.suburb }}, {{ invoice.job.town_city }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ invoice.job.homeowner_name }}</div>
+                            <div class="text-sm text-gray-500">
+                                <a href="tel:{{ invoice.job.homeowner_phone }}" class="text-blue-600 hover:text-blue-800">
+                                    {{ invoice.job.homeowner_phone }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ invoice.job.retailer.name }}</div>
+                            <div class="text-sm text-gray-500">
+                                <a href="mailto:{{ invoice.job.retailer.email }}" class="text-blue-600 hover:text-blue-800">
+                                    {{ invoice.job.retailer.email }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ invoice.total | nz_currency }}</div>
+                            <div class="text-sm text-gray-500">
+                                {{ invoice.lines|length }} items
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                {% if invoice.status == 'paid' %}bg-green-100 text-green-800
+                                {% elif invoice.status == 'sent' %}bg-blue-100 text-blue-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ invoice.status.title() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ invoice.date_created | nz_date }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('invoice_preview', invoice_id=invoice.id) }}" 
+                                   class="text-blue-600 hover:text-blue-800" 
+                                   title="View Invoice">
+                                    <i data-feather="eye" class="h-4 w-4"></i>
+                                </a>
+                                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id) }}" 
+                                   class="text-green-600 hover:text-green-800" 
+                                   title="Download PDF">
+                                    <i data-feather="download" class="h-4 w-4"></i>
+                                </a>
+                                <a href="{{ url_for('invoice_email', invoice_id=invoice.id) }}" 
+                                   class="text-purple-600 hover:text-purple-800" 
+                                   title="Send Email">
+                                    <i data-feather="mail" class="h-4 w-4"></i>
+                                </a>
+                                <a href="#" class="text-indigo-600 hover:text-indigo-800" title="Edit Invoice">
+                                    <i data-feather="edit" class="h-4 w-4"></i>
+                                </a>
+                                <a href="#" class="text-red-600 hover:text-red-800" title="Delete Invoice">
+                                    <i data-feather="trash-2" class="h-4 w-4"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <i data-feather="file-text" class="h-12 w-12 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No invoices yet</h3>
+            <p class="text-gray-500 mb-6">Create your first invoice by adding a job and generating the invoice.</p>
+            <div class="space-y-3 sm:space-y-0 sm:space-x-3 sm:flex sm:justify-center">
+                <a href="{{ url_for('jobs') }}" class="btn-primary">
+                    <i data-feather="briefcase" class="inline h-4 w-4 mr-2"></i>
+                    View Jobs
+                </a>
+                <a href="{{ url_for('add_job') }}" class="btn-secondary">
+                    <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+                    Add New Job
+                </a>
+            </div>
+            <p class="mt-4 text-sm text-gray-500">
+                Tip: You need to create jobs before you can generate invoices.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recent Activity -->
+{% if invoices %}
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent PDFs Generated -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent PDF Downloads</h3>
+            {% set recent_files = invoices|selectattr('files')|list %}
+            {% if recent_files %}
+            <div class="space-y-3">
+                {% for invoice in recent_files[:5] %}
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i data-feather="file-text" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">{{ invoice.invoice_code }}</p>
+                            <p class="text-sm text-gray-500">{{ invoice.job.homeowner_name }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id) }}" 
+                           class="text-blue-600 hover:text-blue-800">
+                            <i data-feather="download" class="h-4 w-4"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-sm">No PDFs generated yet</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Statistics</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between">
+                    <span class="text-sm text-gray-600">Average Invoice Value:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {% if invoices %}
+                            {{ (invoices|sum(attribute='total') / invoices|length) | nz_currency }}
+                        {% else %}
+                            $0.00 NZD
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-gray-600">This Month's Revenue:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {% set this_month = invoices|selectattr('date_created')|list %}
+                        {{ (this_month|sum(attribute='total') if this_month else 0) | nz_currency }}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-gray-600">Outstanding Invoices:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {{ invoices|rejectattr('status', 'equalto', 'paid')|list|length }}
+                    </span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-sm text-gray-600">Most Recent:</span>
+                    <span class="text-sm font-medium text-gray-900">
+                        {% if invoices %}
+                            {{ invoices[0].date_created | nz_date }}
+                        {% else %}
+                            None
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    // Add confirmation for delete actions
+    document.querySelectorAll('a[title="Delete Invoice"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
+                // Implement delete functionality here
+                console.log('Delete invoice functionality to be implemented');
+            }
+        });
+    });
+    
+    // Status update functionality (future enhancement)
+    function updateInvoiceStatus(invoiceId, newStatus) {
+        // This would be implemented with HTMX or fetch
+        console.log(`Update invoice ${invoiceId} to ${newStatus}`);
+    }
+    
+    // Print multiple invoices functionality
+    function printMultipleInvoices() {
+        const checkedInvoices = document.querySelectorAll('input[name="selected_invoices"]:checked');
+        if (checkedInvoices.length === 0) {
+            alert('Please select at least one invoice to print.');
+            return;
+        }
+        
+        // Implementation would batch print selected invoices
+        console.log('Batch print functionality to be implemented');
+    }
+    
+    // Auto-refresh to show real-time updates
+    setTimeout(() => {
+        // Only refresh if no forms are being edited
+        if (!document.querySelector('input:focus, textarea:focus, select:focus')) {
+            window.location.reload();
+        }
+    }, 60000); // Refresh every minute
+</script>
+{% endblock %}
