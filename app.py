@@ -51,19 +51,32 @@ def format_nz_currency(amount):
     return f"${amount:.2f} NZD"
 
 def generate_invoice_code(invoice_id, street_address, retailer_name, homeowner_name):
-    """Generate invoice code in format: <ID>-<StreetNoStreet>-<Retailer>-<Homeowner>"""
-    # Extract street number and street from address
-    street_match = re.match(r'^(\d+)\s+(.+)', street_address.strip())
-    if street_match:
-        street_no_street = f"{street_match.group(1)}{street_match.group(2).replace(' ', '')}"
+    """Generate invoice code in format: 2526RTHO where 2526 is tax year, RT is retailer initials, HO is homeowner initials"""
+    # Get current date to determine tax year
+    current_date = datetime.now()
+    if current_date.month >= 4:  # Tax year starts April 1
+        tax_year_start = current_date.year
     else:
-        street_no_street = street_address.replace(' ', '')[:20]
+        tax_year_start = current_date.year - 1
     
-    # Clean retailer and homeowner names
-    retailer_clean = re.sub(r'[^a-zA-Z0-9]', '', retailer_name)[:10]
-    homeowner_clean = re.sub(r'[^a-zA-Z0-9]', '', homeowner_name)[:10]
+    # Format as YYNN where YY is last 2 digits of start year, NN is last 2 digits of end year
+    tax_year = f"{str(tax_year_start)[-2:]}{str(tax_year_start + 1)[-2:]}"
     
-    return f"{invoice_id}-{street_no_street}-{retailer_clean}-{homeowner_clean}"
+    # Get retailer initials (first 2 letters)
+    retailer_initials = ''.join(re.findall(r'[A-Za-z]', retailer_name))[:2].upper()
+    if len(retailer_initials) < 2:
+        retailer_initials = retailer_initials.ljust(2, 'X')  # Pad with X if less than 2 letters
+    
+    # Get homeowner initials (first letter of first name and first letter of last name)
+    homeowner_parts = homeowner_name.strip().split()
+    if len(homeowner_parts) >= 2:
+        homeowner_initials = f"{homeowner_parts[0][0]}{homeowner_parts[-1][0]}".upper()
+    elif len(homeowner_parts) == 1:
+        homeowner_initials = f"{homeowner_parts[0][0]}X".upper()  # Pad with X if only one name
+    else:
+        homeowner_initials = "XX"
+    
+    return f"{tax_year}{retailer_initials}{homeowner_initials}"
 
 @app.route('/')
 def index():
@@ -283,8 +296,14 @@ def invoice_pdf(invoice_id):
         # Generate PDF
         pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
         
-        # Save to FileStore
-        filename = f"invoice_{invoice.invoice_code}.pdf"
+        # Generate filename in format: InvoiceNumber - StreetNumStreetName
+        street_match = re.match(r'^(\d+)\s+(.+)', invoice.job.street_address.strip())
+        if street_match:
+            street_part = f"{street_match.group(1)}{street_match.group(2).replace(' ', '')}"
+        else:
+            street_part = invoice.job.street_address.replace(' ', '')
+        
+        filename = f"{invoice.invoice_code} - {street_part}.pdf"
         file_store = FileStore(
             invoice_id=invoice.id,
             file_path=filename,
