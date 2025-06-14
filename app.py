@@ -205,7 +205,8 @@ def create_invoice():
         flash('Job not found!', 'error')
         return redirect(url_for('jobs'))
     
-    # Create invoice
+    # Create invoice with a temporary invoice code
+    temp_invoice_code = f"TEMP-{datetime.now().strftime('%Y%m%d%H%M%S')}"
     invoice = Invoice(
         job_id=job_id,
         date_created=datetime.now().date(),
@@ -213,12 +214,13 @@ def create_invoice():
         gst_percentage=15.0,
         subtotal=0.0,
         gst_amount=0.0,
-        total=0.0
+        total=0.0,
+        invoice_code=temp_invoice_code
     )
     db.session.add(invoice)
     db.session.flush()  # Get the ID
     
-    # Generate invoice code
+    # Generate proper invoice code
     invoice.invoice_code = generate_invoice_code(
         invoice.id, job.street_address, job.retailer.name, job.homeowner_name
     )
