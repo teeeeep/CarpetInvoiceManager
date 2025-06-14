@@ -277,7 +277,7 @@ def invoice_pdf(invoice_id):
         return redirect(url_for('invoices'))
     
     # Render HTML for PDF
-    html_content = render_template('invoice_preview.html', invoice=invoice, for_pdf=True)
+    html_content = render_template('invoice_pdf.html', invoice=invoice)
     
     # Generate PDF
     pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()

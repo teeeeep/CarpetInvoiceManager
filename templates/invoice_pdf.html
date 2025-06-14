@@ -1,0 +1,218 @@
+
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_code }}{% endblock %}
+
+{% block content %}
+<style>
+    @page {
+        size: A4;
+        margin: 2cm;
+        @top-center {
+            content: "Invoice {{ invoice.invoice_code }}";
+            font-size: 10pt;
+            color: #666;
+        }
+        @bottom-center {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 10pt;
+            color: #666;
+        }
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12pt;
+        line-height: 1.4;
+        color: #333;
+    }
+    
+    .invoice-header {
+        border-bottom: 2px solid #0891b2;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .company-info {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+    
+    .invoice-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+    
+    .bill-to, .invoice-info {
+        width: 45%;
+    }
+    
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+    
+    .invoice-table th,
+    .invoice-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .invoice-table th {
+        background-color: #f8fafc;
+        font-weight: bold;
+        border-bottom: 2px solid #0891b2;
+    }
+    
+    .invoice-table .text-right {
+        text-align: right;
+    }
+    
+    .totals-section {
+        float: right;
+        width: 300px;
+        margin-top: 20px;
+    }
+    
+    .totals-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .totals-table td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .totals-table .total-row {
+        font-weight: bold;
+        background-color: #f8fafc;
+        border-top: 2px solid #0891b2;
+    }
+    
+    .footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        font-size: 10pt;
+        color: #666;
+        clear: both;
+    }
+    
+    .payment-terms {
+        margin-top: 30px;
+        padding: 15px;
+        background-color: #f8fafc;
+        border-left: 4px solid #0891b2;
+    }
+</style>
+
+<div class="invoice-container">
+    <!-- Company Header -->
+    <div class="invoice-header">
+        <div class="company-info">
+            <!-- Uncomment and add your logo file to static/ folder -->
+            <!-- <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" style="height: 60px; margin-bottom: 10px;"> -->
+            <h1 style="margin: 0; color: #0891b2; font-size: 24pt;">Carpet Invoices</h1>
+            <p style="margin: 5px 0;">Professional Carpet Installation Services</p>
+            <p style="margin: 5px 0;">New Zealand</p>
+            <p style="margin: 5px 0;">Email: info@carpetinvoices.co.nz</p>
+            <p style="margin: 5px 0;">Phone: 0800-CARPET</p>
+        </div>
+    </div>
+
+    <!-- Invoice Details -->
+    <div class="invoice-details">
+        <div class="bill-to">
+            <h3 style="color: #0891b2; margin-bottom: 15px;">Bill To:</h3>
+            <p><strong>{{ invoice.job.retailer.name }}</strong></p>
+            <p>{{ invoice.job.retailer.email }}</p>
+            <p>{{ invoice.job.retailer.phone }}</p>
+            <br>
+            <p><strong>Installation Address:</strong></p>
+            <p>{{ invoice.job.street_address }}</p>
+            <p>{{ invoice.job.suburb }}, {{ invoice.job.town_city }}</p>
+            <p><strong>Homeowner:</strong> {{ invoice.job.homeowner_name }}</p>
+        </div>
+        
+        <div class="invoice-info">
+            <h3 style="color: #0891b2; margin-bottom: 15px;">Invoice Details:</h3>
+            <table style="width: 100%;">
+                <tr>
+                    <td><strong>Invoice Number:</strong></td>
+                    <td>{{ invoice.invoice_code }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Invoice Date:</strong></td>
+                    <td>{{ invoice.date_created|nz_date }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Job Completed:</strong></td>
+                    <td>{{ invoice.job.date_completed|nz_date }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Status:</strong></td>
+                    <td style="text-transform: capitalize;">{{ invoice.status }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Invoice Items -->
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Unit Price</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in invoice.lines %}
+            <tr>
+                <td>{{ line.description }}</td>
+                <td class="text-right">{{ line.quantity }}</td>
+                <td class="text-right">{{ line.unit_price|nz_currency }}</td>
+                <td class="text-right">{{ line.line_total|nz_currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal:</td>
+                <td class="text-right">{{ invoice.subtotal|nz_currency }}</td>
+            </tr>
+            <tr>
+                <td>GST ({{ invoice.gst_percentage }}%):</td>
+                <td class="text-right">{{ invoice.gst_amount|nz_currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>Total:</strong></td>
+                <td class="text-right"><strong>{{ invoice.total|nz_currency }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Payment Terms -->
+    <div class="payment-terms">
+        <h4 style="margin-top: 0; color: #0891b2;">Payment Terms</h4>
+        <p style="margin: 5px 0;">Payment is due within 30 days of invoice date.</p>
+        <p style="margin: 5px 0;">Please reference invoice number {{ invoice.invoice_code }} when making payment.</p>
+        <p style="margin: 5px 0;">Bank transfer details available upon request.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Thank you for choosing our carpet installation services.</p>
+        <p>This invoice was generated on {{ "now"|date("%d/%m/%Y at %H:%M") }} NZT</p>
+    </div>
+</div>
+{% endblock %}
