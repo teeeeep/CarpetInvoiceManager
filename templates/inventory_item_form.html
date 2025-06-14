@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Add Inventory Item - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Add New Inventory Item</h1>
+        <p class="mt-2 text-gray-600">Add a new carpet material or supply to your inventory</p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-lg shadow">
+        <form action="{{ url_for('add_inventory_item') }}" method="POST" class="p-6 space-y-6">
+            
+            <!-- Basic Information Section -->
+            <div class="border-b pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                
+                <!-- Item Name -->
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Item Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., Wool Carpet - Beige"
+                           value="{{ request.form.get('name', '') }}">
+                    <p class="mt-1 text-sm text-gray-500">The name of the carpet material or supply</p>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                    </label>
+                    <textarea id="description" 
+                              name="description" 
+                              rows="3"
+                              class="form-textarea touch-input"
+                              placeholder="e.g., High-quality wool carpet suitable for residential areas">{{ request.form.get('description', '') }}</textarea>
+                    <p class="mt-1 text-sm text-gray-500">Optional detailed description</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Category -->
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                            Category <span class="text-red-500">*</span>
+                        </label>
+                        <select id="category" 
+                                name="category" 
+                                required
+                                class="form-select touch-input">
+                            <option value="">Choose category...</option>
+                            <option value="carpet" {% if request.form.get('category') == 'carpet' %}selected{% endif %}>Carpet</option>
+                            <option value="underlay" {% if request.form.get('category') == 'underlay' %}selected{% endif %}>Underlay</option>
+                            <option value="adhesive" {% if request.form.get('category') == 'adhesive' %}selected{% endif %}>Adhesive</option>
+                            <option value="tools" {% if request.form.get('category') == 'tools' %}selected{% endif %}>Tools</option>
+                            <option value="supplies" {% if request.form.get('category') == 'supplies' %}selected{% endif %}>Supplies</option>
+                            <option value="other" {% if request.form.get('category') == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Unit of Measurement -->
+                    <div>
+                        <label for="unit" class="block text-sm font-medium text-gray-700 mb-2">
+                            Unit <span class="text-red-500">*</span>
+                        </label>
+                        <select id="unit" 
+                                name="unit" 
+                                required
+                                class="form-select touch-input">
+                            <option value="">Choose unit...</option>
+                            <option value="m²" {% if request.form.get('unit') == 'm²' %}selected{% endif %}>m² (Square metres)</option>
+                            <option value="m" {% if request.form.get('unit') == 'm' %}selected{% endif %}>m (Linear metres)</option>
+                            <option value="pieces" {% if request.form.get('unit') == 'pieces' %}selected{% endif %}>Pieces</option>
+                            <option value="litres" {% if request.form.get('unit') == 'litres' %}selected{% endif %}>Litres</option>
+                            <option value="kg" {% if request.form.get('unit') == 'kg' %}selected{% endif %}>Kilograms</option>
+                            <option value="rolls" {% if request.form.get('unit') == 'rolls' %}selected{% endif %}>Rolls</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Information Section -->
+            <div class="border-b pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Stock Information</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Unit Cost -->
+                    <div>
+                        <label for="unit_cost" class="block text-sm font-medium text-gray-700 mb-2">
+                            Unit Cost (NZD) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" 
+                               id="unit_cost" 
+                               name="unit_cost" 
+                               step="0.01"
+                               min="0"
+                               required
+                               class="form-input touch-input"
+                               placeholder="0.00"
+                               value="{{ request.form.get('unit_cost', '') }}">
+                    </div>
+
+                    <!-- Current Stock -->
+                    <div>
+                        <label for="current_stock" class="block text-sm font-medium text-gray-700 mb-2">
+                            Current Stock
+                        </label>
+                        <input type="number" 
+                               id="current_stock" 
+                               name="current_stock" 
+                               step="0.01"
+                               min="0"
+                               class="form-input touch-input"
+                               placeholder="0"
+                               value="{{ request.form.get('current_stock', '0') }}">
+                    </div>
+
+                    <!-- Minimum Stock -->
+                    <div>
+                        <label for="minimum_stock" class="block text-sm font-medium text-gray-700 mb-2">
+                            Minimum Stock Level
+                        </label>
+                        <input type="number" 
+                               id="minimum_stock" 
+                               name="minimum_stock" 
+                               step="0.01"
+                               min="0"
+                               class="form-input touch-input"
+                               placeholder="10"
+                               value="{{ request.form.get('minimum_stock', '10') }}">
+                        <p class="mt-1 text-sm text-gray-500">Alert level for low stock</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supplier Information Section -->
+            <div>
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Supplier Information</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Supplier -->
+                    <div>
+                        <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">
+                            Supplier Name
+                        </label>
+                        <input type="text" 
+                               id="supplier" 
+                               name="supplier" 
+                               class="form-input touch-input"
+                               placeholder="e.g., Auckland Carpet Supplies"
+                               value="{{ request.form.get('supplier', '') }}">
+                    </div>
+
+                    <!-- Supplier Code -->
+                    <div>
+                        <label for="supplier_code" class="block text-sm font-medium text-gray-700 mb-2">
+                            Supplier Code
+                        </label>
+                        <input type="text" 
+                               id="supplier_code" 
+                               name="supplier_code" 
+                               class="form-input touch-input"
+                               placeholder="e.g., WC-BG-001"
+                               value="{{ request.form.get('supplier_code', '') }}">
+                        <p class="mt-1 text-sm text-gray-500">Supplier's product code</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                <a href="{{ url_for('inventory') }}" class="btn-secondary text-center">
+                    <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i data-feather="save" class="inline h-4 w-4 mr-2"></i>
+                    Save Item
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Card -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="info" class="h-5 w-5 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Tips for Adding Inventory Items</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Use clear, descriptive names for easy identification</li>
+                        <li>Set minimum stock levels to get low stock alerts</li>
+                        <li>Include supplier information for easy reordering</li>
+                        <li>Choose the correct unit of measurement for accurate tracking</li>
+                        <li>Enter current unit cost for accurate inventory valuation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Units Guide -->
+    <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="help-circle" class="h-5 w-5 text-green-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">Common Units for Carpet Installation</h3>
+                <div class="mt-2 text-sm text-green-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>m²</strong> - For carpet and underlay sold by area</li>
+                        <li><strong>m</strong> - For carpet strips and edging sold by length</li>
+                        <li><strong>Pieces</strong> - For individual tools and hardware</li>
+                        <li><strong>Litres</strong> - For liquid adhesives and cleaners</li>
+                        <li><strong>Rolls</strong> - For carpet and underlay sold in standard rolls</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    // Auto-focus the name field
+    document.getElementById('name').focus();
+    
+    // Auto-suggest units based on category
+    document.getElementById('category').addEventListener('change', function() {
+        const category = this.value;
+        const unitSelect = document.getElementById('unit');
+        
+        // Clear current selection
+        unitSelect.value = '';
+        
+        // Suggest appropriate units
+        if (category === 'carpet' || category === 'underlay') {
+            unitSelect.value = 'm²';
+        } else if (category === 'adhesive') {
+            unitSelect.value = 'litres';
+        } else if (category === 'tools') {
+            unitSelect.value = 'pieces';
+        }
+    });
+    
+    // Calculate total value as user types
+    function updateTotalValue() {
+        const unitCost = parseFloat(document.getElementById('unit_cost').value) || 0;
+        const currentStock = parseFloat(document.getElementById('current_stock').value) || 0;
+        const totalValue = unitCost * currentStock;
+        
+        // Show total value in a small display (if we add one)
+        console.log(`Total value: $${totalValue.toFixed(2)} NZD`);
+    }
+    
+    document.getElementById('unit_cost').addEventListener('input', updateTotalValue);
+    document.getElementById('current_stock').addEventListener('input', updateTotalValue);
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const name = document.getElementById('name').value.trim();
+        const category = document.getElementById('category').value;
+        const unit = document.getElementById('unit').value;
+        const unitCost = document.getElementById('unit_cost').value;
+        
+        if (!name || !category || !unit || !unitCost) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        if (parseFloat(unitCost) < 0) {
+            e.preventDefault();
+            alert('Unit cost cannot be negative.');
+            document.getElementById('unit_cost').focus();
+            return;
+        }
+        
+        // Add loading state to button
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Saving...';
+        
+        // Re-enable button after 10 seconds as fallback
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            feather.replace();
+        }, 10000);
+    });
+</script>
+{% endblock %}

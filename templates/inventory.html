@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory - Carpet Invoices{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Inventory Management</h1>
+        <p class="mt-2 text-gray-600">Track carpet materials and supplies</p>
+    </div>
+    <div class="mt-4 sm:mt-0 flex gap-3">
+        <a href="{{ url_for('low_stock_report') }}" class="btn-secondary">
+            <i data-feather="alert-triangle" class="inline h-4 w-4 mr-2"></i>
+            Low Stock Report
+        </a>
+        <a href="{{ url_for('add_inventory_item') }}" class="btn-primary">
+            <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+            Add Item
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100">
+                <i data-feather="package" class="h-6 w-6 text-blue-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Items</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_items }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-orange-100">
+                <i data-feather="alert-triangle" class="h-6 w-6 text-orange-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Low Stock</p>
+                <p class="text-2xl font-bold text-gray-900">{{ low_stock_count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-red-100">
+                <i data-feather="x-circle" class="h-6 w-6 text-red-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Out of Stock</p>
+                <p class="text-2xl font-bold text-gray-900">{{ out_of_stock_count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100">
+                <i data-feather="dollar-sign" class="h-6 w-6 text-green-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Value</p>
+                <p class="text-2xl font-bold text-gray-900">{{ total_value | nz_currency }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Items List -->
+<div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">All Inventory Items</h2>
+        
+        {% if items %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Item
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Current Stock
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Unit Cost
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Value
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in items %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                        <i data-feather="package" class="h-5 w-5 text-gray-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ item.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ item.description }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ item.category.title() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">{{ item.current_stock }} {{ item.unit }}</div>
+                            <div class="text-sm text-gray-500">Min: {{ item.minimum_stock }} {{ item.unit }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ item.unit_cost | nz_currency }} per {{ item.unit }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {{ item.total_value | nz_currency }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if item.stock_status == 'out_of_stock' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <i data-feather="x-circle" class="w-3 h-3 mr-1"></i>
+                                    Out of Stock
+                                </span>
+                            {% elif item.stock_status == 'low_stock' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                    <i data-feather="alert-triangle" class="w-3 h-3 mr-1"></i>
+                                    Low Stock
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <i data-feather="check-circle" class="w-3 h-3 mr-1"></i>
+                                    In Stock
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('inventory_item_detail', item_id=item.id) }}" 
+                                   class="text-blue-600 hover:text-blue-800" 
+                                   title="View Details">
+                                    <i data-feather="eye" class="h-4 w-4"></i>
+                                </a>
+                                <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" 
+                                   class="text-green-600 hover:text-green-800" 
+                                   title="Add Stock Movement">
+                                    <i data-feather="plus-circle" class="h-4 w-4"></i>
+                                </a>
+                                <a href="#" class="text-indigo-600 hover:text-indigo-800" title="Edit Item">
+                                    <i data-feather="edit" class="h-4 w-4"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <i data-feather="package" class="h-12 w-12 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No inventory items yet</h3>
+            <p class="text-gray-500 mb-6">Start tracking your carpet materials and supplies.</p>
+            <div class="space-y-3 sm:space-y-0 sm:space-x-3 sm:flex sm:justify-center">
+                <a href="{{ url_for('add_inventory_item') }}" class="btn-primary">
+                    <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+                    Add First Item
+                </a>
+                <a href="{{ url_for('index') }}" class="btn-secondary">
+                    <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Alerts Section -->
+{% if low_stock_items or out_of_stock_items %}
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Low Stock Alerts -->
+    {% if low_stock_items %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Low Stock Alerts</h3>
+                <a href="{{ url_for('low_stock_report') }}" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+                    View All
+                    <i data-feather="arrow-right" class="inline h-4 w-4 ml-1"></i>
+                </a>
+            </div>
+            <div class="space-y-3">
+                {% for item in low_stock_items %}
+                <div class="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div>
+                        <p class="text-sm font-medium text-orange-800">{{ item.name }}</p>
+                        <p class="text-xs text-orange-600">{{ item.current_stock }} {{ item.unit }} remaining</p>
+                    </div>
+                    <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" 
+                       class="text-orange-600 hover:text-orange-800">
+                        <i data-feather="plus-circle" class="h-4 w-4"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Out of Stock Alerts -->
+    {% if out_of_stock_items %}
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Out of Stock</h3>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Urgent
+                </span>
+            </div>
+            <div class="space-y-3">
+                {% for item in out_of_stock_items %}
+                <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <div>
+                        <p class="text-sm font-medium text-red-800">{{ item.name }}</p>
+                        <p class="text-xs text-red-600">{{ item.category.title() }} - {{ item.unit }}</p>
+                    </div>
+                    <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" 
+                       class="text-red-600 hover:text-red-800">
+                        <i data-feather="plus-circle" class="h-4 w-4"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    // Filter functionality
+    function filterByCategory(category) {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            if (category === 'all' || row.textContent.toLowerCase().includes(category.toLowerCase())) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    // Search functionality
+    function searchItems(query) {
+        const rows = document.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            if (row.textContent.toLowerCase().includes(query.toLowerCase())) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

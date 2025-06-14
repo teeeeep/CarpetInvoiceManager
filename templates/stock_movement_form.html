@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Add Stock Movement - {{ item.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center mb-8">
+        <a href="{{ url_for('inventory_item_detail', item_id=item.id) }}" class="text-gray-500 hover:text-gray-700 mr-4">
+            <i data-feather="arrow-left" class="h-6 w-6"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Add Stock Movement</h1>
+            <p class="mt-2 text-gray-600">Update stock levels for <strong>{{ item.name }}</strong></p>
+        </div>
+    </div>
+
+    <!-- Current Stock Status -->
+    <div class="bg-white rounded-lg shadow mb-6 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Stock Status</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="text-center">
+                <p class="text-sm text-gray-500">Current Stock</p>
+                <p class="text-2xl font-bold text-gray-900">{{ item.current_stock }} {{ item.unit }}</p>
+            </div>
+            <div class="text-center">
+                <p class="text-sm text-gray-500">Minimum Level</p>
+                <p class="text-lg font-medium text-gray-700">{{ item.minimum_stock }} {{ item.unit }}</p>
+            </div>
+            <div class="text-center">
+                <p class="text-sm text-gray-500">Status</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if item.stock_status == 'out_of_stock' %}bg-red-100 text-red-800{% elif item.stock_status == 'low_stock' %}bg-orange-100 text-orange-800{% else %}bg-green-100 text-green-800{% endif %}">
+                    {% if item.stock_status == 'out_of_stock' %}Out of Stock{% elif item.stock_status == 'low_stock' %}Low Stock{% else %}In Stock{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movement Form -->
+    <div class="bg-white rounded-lg shadow">
+        <form action="{{ url_for('add_stock_movement', item_id=item.id) }}" method="POST" class="p-6 space-y-6">
+            
+            <!-- Movement Type -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-3">
+                    Movement Type <span class="text-red-500">*</span>
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <label class="relative">
+                        <input type="radio" name="movement_type" value="in" class="sr-only" required>
+                        <div class="movement-type-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-green-300 transition-colors">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="p-2 rounded-full bg-green-100">
+                                    <i data-feather="plus-circle" class="h-6 w-6 text-green-600"></i>
+                                </div>
+                            </div>
+                            <h4 class="text-center font-medium text-gray-900">Stock In</h4>
+                            <p class="text-center text-sm text-gray-500 mt-1">Add inventory</p>
+                        </div>
+                    </label>
+                    
+                    <label class="relative">
+                        <input type="radio" name="movement_type" value="out" class="sr-only" required>
+                        <div class="movement-type-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-red-300 transition-colors">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="p-2 rounded-full bg-red-100">
+                                    <i data-feather="minus-circle" class="h-6 w-6 text-red-600"></i>
+                                </div>
+                            </div>
+                            <h4 class="text-center font-medium text-gray-900">Stock Out</h4>
+                            <p class="text-center text-sm text-gray-500 mt-1">Remove inventory</p>
+                        </div>
+                    </label>
+                    
+                    <label class="relative">
+                        <input type="radio" name="movement_type" value="adjustment" class="sr-only" required>
+                        <div class="movement-type-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-300 transition-colors">
+                            <div class="flex items-center justify-center mb-2">
+                                <div class="p-2 rounded-full bg-blue-100">
+                                    <i data-feather="edit" class="h-6 w-6 text-blue-600"></i>
+                                </div>
+                            </div>
+                            <h4 class="text-center font-medium text-gray-900">Adjustment</h4>
+                            <p class="text-center text-sm text-gray-500 mt-1">Correct levels</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Quantity -->
+            <div>
+                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">
+                    Quantity <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                    <input type="number" 
+                           id="quantity" 
+                           name="quantity" 
+                           step="0.01"
+                           min="0.01"
+                           required
+                           class="form-input touch-input pr-16"
+                           placeholder="0.00">
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500 sm:text-sm">{{ item.unit }}</span>
+                    </div>
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Enter the quantity to add, remove, or adjust</p>
+            </div>
+
+            <!-- Unit Cost -->
+            <div>
+                <label for="unit_cost" class="block text-sm font-medium text-gray-700 mb-2">
+                    Unit Cost (NZD)
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span class="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input type="number" 
+                           id="unit_cost" 
+                           name="unit_cost" 
+                           step="0.01"
+                           min="0"
+                           class="form-input touch-input pl-8"
+                           placeholder="{{ item.unit_cost }}"
+                           value="{{ item.unit_cost }}">
+                </div>
+                <p class="mt-1 text-sm text-gray-500">Cost per {{ item.unit }} at time of movement (optional)</p>
+            </div>
+
+            <!-- Reference Information -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Reference Type -->
+                <div>
+                    <label for="reference_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        Reference Type
+                    </label>
+                    <select id="reference_type" 
+                            name="reference_type" 
+                            class="form-select touch-input">
+                        <option value="manual">Manual Entry</option>
+                        <option value="purchase">Purchase Order</option>
+                        <option value="job">Job Usage</option>
+                        <option value="adjustment">Stock Adjustment</option>
+                        <option value="waste">Waste/Damage</option>
+                        <option value="return">Return</option>
+                    </select>
+                </div>
+
+                <!-- Reference ID -->
+                <div>
+                    <label for="reference_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Reference ID
+                    </label>
+                    <input type="text" 
+                           id="reference_id" 
+                           name="reference_id" 
+                           class="form-input touch-input"
+                           placeholder="e.g., Job #123, PO-456">
+                    <p class="mt-1 text-sm text-gray-500">Optional job or order reference</p>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                    Notes
+                </label>
+                <textarea id="notes" 
+                          name="notes" 
+                          rows="3"
+                          class="form-textarea touch-input"
+                          placeholder="Additional details about this stock movement..."></textarea>
+            </div>
+
+            <!-- Calculated New Stock Level -->
+            <div id="stock-preview" class="bg-gray-50 border border-gray-200 rounded-lg p-4 hidden">
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Stock Level Preview</h4>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-500">Current</p>
+                        <p class="font-medium text-gray-900">{{ item.current_stock }} {{ item.unit }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Change</p>
+                        <p id="change-amount" class="font-medium"></p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">New Level</p>
+                        <p id="new-level" class="font-medium"></p>
+                    </div>
+                </div>
+                <div id="stock-warning" class="mt-3 hidden">
+                    <div class="flex items-center">
+                        <i data-feather="alert-triangle" class="h-4 w-4 text-orange-500 mr-2"></i>
+                        <p class="text-sm text-orange-700"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                <a href="{{ url_for('inventory_item_detail', item_id=item.id) }}" class="btn-secondary text-center">
+                    <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary">
+                    <i data-feather="save" class="inline h-4 w-4 mr-2"></i>
+                    Record Movement
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Card -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="info" class="h-5 w-5 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Stock Movement Types</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Stock In:</strong> New deliveries, returns, found items</li>
+                        <li><strong>Stock Out:</strong> Job usage, sales, waste, damage</li>
+                        <li><strong>Adjustment:</strong> Corrections after physical counts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+    
+    const currentStock = {{ item.current_stock }};
+    const minimumStock = {{ item.minimum_stock }};
+    const unit = '{{ item.unit }}';
+    
+    // Handle movement type selection
+    const movementTypeInputs = document.querySelectorAll('input[name="movement_type"]');
+    const movementTypeCards = document.querySelectorAll('.movement-type-card');
+    
+    movementTypeInputs.forEach((input, index) => {
+        input.addEventListener('change', function() {
+            // Reset all cards
+            movementTypeCards.forEach(card => {
+                card.classList.remove('border-green-500', 'border-red-500', 'border-blue-500', 'bg-green-50', 'bg-red-50', 'bg-blue-50');
+                card.classList.add('border-gray-200');
+            });
+            
+            // Highlight selected card
+            if (this.checked) {
+                const card = movementTypeCards[index];
+                if (this.value === 'in') {
+                    card.classList.add('border-green-500', 'bg-green-50');
+                } else if (this.value === 'out') {
+                    card.classList.add('border-red-500', 'bg-red-50');
+                } else {
+                    card.classList.add('border-blue-500', 'bg-blue-50');
+                }
+                card.classList.remove('border-gray-200');
+            }
+            
+            updateStockPreview();
+        });
+    });
+    
+    // Handle quantity input
+    const quantityInput = document.getElementById('quantity');
+    quantityInput.addEventListener('input', updateStockPreview);
+    
+    function updateStockPreview() {
+        const movementType = document.querySelector('input[name="movement_type"]:checked');
+        const quantity = parseFloat(quantityInput.value) || 0;
+        
+        if (!movementType || quantity <= 0) {
+            document.getElementById('stock-preview').classList.add('hidden');
+            return;
+        }
+        
+        let change = quantity;
+        if (movementType.value === 'out') {
+            change = -quantity;
+        }
+        
+        const newLevel = currentStock + change;
+        
+        // Show preview
+        const preview = document.getElementById('stock-preview');
+        const changeAmount = document.getElementById('change-amount');
+        const newLevelElement = document.getElementById('new-level');
+        const warning = document.getElementById('stock-warning');
+        
+        preview.classList.remove('hidden');
+        
+        // Update change amount
+        changeAmount.textContent = (change >= 0 ? '+' : '') + change + ' ' + unit;
+        changeAmount.className = 'font-medium ' + (change >= 0 ? 'text-green-600' : 'text-red-600');
+        
+        // Update new level
+        newLevelElement.textContent = newLevel + ' ' + unit;
+        newLevelElement.className = 'font-medium ' + (newLevel < 0 ? 'text-red-600' : newLevel <= minimumStock ? 'text-orange-600' : 'text-green-600');
+        
+        // Show warnings
+        warning.classList.add('hidden');
+        if (newLevel < 0 && movementType.value === 'out') {
+            warning.classList.remove('hidden');
+            warning.querySelector('p').textContent = 'Warning: This will result in negative stock!';
+        } else if (newLevel <= minimumStock && newLevel > 0) {
+            warning.classList.remove('hidden');
+            warning.querySelector('p').textContent = 'Notice: Stock will be at or below minimum level.';
+        }
+        
+        feather.replace();
+    }
+    
+    // Auto-focus quantity after movement type is selected
+    movementTypeInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            setTimeout(() => quantityInput.focus(), 100);
+        });
+    });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const movementType = document.querySelector('input[name="movement_type"]:checked');
+        const quantity = parseFloat(quantityInput.value) || 0;
+        
+        if (!movementType) {
+            e.preventDefault();
+            alert('Please select a movement type.');
+            return;
+        }
+        
+        if (quantity <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid quantity greater than 0.');
+            quantityInput.focus();
+            return;
+        }
+        
+        // Check for negative stock
+        if (movementType.value === 'out' && (currentStock - quantity) < 0) {
+            if (!confirm('This will result in negative stock. Are you sure you want to continue?')) {
+                e.preventDefault();
+                return;
+            }
+        }
+        
+        // Add loading state
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Recording...';
+        
+        // Fallback re-enable
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            feather.replace();
+        }, 10000);
+    });
+</script>
+
+<style>
+/* Custom styles for movement type cards */
+.movement-type-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.movement-type-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+input[type="radio"]:checked + .movement-type-card {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

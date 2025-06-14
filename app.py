@@ -34,7 +34,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 db.init_app(app)
 
 # Import models after db initialization
-from models import Retailer, Job, Invoice, InvoiceLine, FileStore
+from models import Retailer, Job, Invoice, InvoiceLine, FileStore, InventoryItem, StockMovement
 
 def login_required(f):
     """Decorator to require login for protected routes"""
@@ -337,6 +337,145 @@ def calculate_invoice(invoice_id):
         'gst_formatted': format_nz_currency(gst_amount),
         'total_formatted': format_nz_currency(total)
     })
+
+# Inventory Management Routes
+
+@app.route('/inventory')
+@login_required
+def inventory():
+    """List all inventory items"""
+    items = db.session.query(InventoryItem).filter_by(is_active=True).all()
+    
+    # Calculate summary statistics
+    total_items = len(items)
+    low_stock_items = [item for item in items if item.stock_status == 'low_stock']
+    out_of_stock_items = [item for item in items if item.stock_status == 'out_of_stock']
+    total_value = sum(item.total_value for item in items)
+    
+    return render_template('inventory.html', 
+                         items=items,
+                         total_items=total_items,
+                         low_stock_count=len(low_stock_items),
+                         out_of_stock_count=len(out_of_stock_items),
+                         total_value=total_value,
+                         low_stock_items=low_stock_items[:5],  # Show first 5 for quick view
+                         out_of_stock_items=out_of_stock_items[:5])
+
+@app.route('/inventory/add', methods=['GET', 'POST'])
+@login_required
+def add_inventory_item():
+    """Add new inventory item"""
+    if request.method == 'POST':
+        item = InventoryItem(
+            name=request.form.get('name'),
+            description=request.form.get('description'),
+            category=request.form.get('category'),
+            unit=request.form.get('unit'),
+            unit_cost=float(request.form.get('unit_cost', 0)),
+            current_stock=float(request.form.get('current_stock', 0)),
+            minimum_stock=float(request.form.get('minimum_stock', 0)),
+            supplier=request.form.get('supplier'),
+            supplier_code=request.form.get('supplier_code')
+        )
+        db.session.add(item)
+        db.session.flush()  # Get the ID
+        
+        # Create initial stock movement if there's initial stock
+        initial_stock = float(request.form.get('current_stock', 0))
+        if initial_stock > 0:
+            movement = StockMovement(
+                inventory_item_id=item.id,
+                movement_type='in',
+                quantity=initial_stock,
+                unit_cost=item.unit_cost,
+                reference_type='initial_stock',
+                notes='Initial stock entry',
+                created_by='admin'
+            )
+            db.session.add(movement)
+        
+        db.session.commit()
+        flash('Inventory item added successfully!', 'success')
+        return redirect(url_for('inventory'))
+    
+    return render_template('inventory_item_form.html')
+
+@app.route('/inventory/<int:item_id>')
+@login_required
+def inventory_item_detail(item_id):
+    """View inventory item details and stock movements"""
+    item = db.session.get(InventoryItem, item_id)
+    if not item:
+        flash('Inventory item not found!', 'error')
+        return redirect(url_for('inventory'))
+    
+    # Get recent stock movements
+    movements = db.session.query(StockMovement)\
+        .filter_by(inventory_item_id=item_id)\
+        .order_by(StockMovement.date_created.desc())\
+        .limit(20).all()
+    
+    return render_template('inventory_item_detail.html', item=item, movements=movements)
+
+@app.route('/inventory/<int:item_id>/movement', methods=['GET', 'POST'])
+@login_required
+def add_stock_movement(item_id):
+    """Add stock movement (in/out/adjustment)"""
+    item = db.session.get(InventoryItem, item_id)
+    if not item:
+        flash('Inventory item not found!', 'error')
+        return redirect(url_for('inventory'))
+    
+    if request.method == 'POST':
+        movement_type = request.form.get('movement_type')
+        quantity = float(request.form.get('quantity'))
+        
+        # Ensure quantity is positive for calculations
+        if quantity <= 0:
+            flash('Quantity must be greater than 0!', 'error')
+            return render_template('stock_movement_form.html', item=item)
+        
+        # For 'out' movements, make quantity negative
+        if movement_type == 'out':
+            quantity = -quantity
+        
+        # Check if there's enough stock for 'out' movements
+        if movement_type == 'out' and (item.current_stock + quantity) < 0:
+            flash('Insufficient stock for this movement!', 'error')
+            return render_template('stock_movement_form.html', item=item)
+        
+        movement = StockMovement(
+            inventory_item_id=item_id,
+            movement_type=movement_type,
+            quantity=quantity,
+            unit_cost=float(request.form.get('unit_cost', item.unit_cost)),
+            reference_type=request.form.get('reference_type', 'manual'),
+            reference_id=request.form.get('reference_id') if request.form.get('reference_id') else None,
+            notes=request.form.get('notes'),
+            created_by='admin'
+        )
+        
+        # Update current stock
+        item.current_stock += quantity
+        
+        db.session.add(movement)
+        db.session.commit()
+        
+        flash(f'Stock movement recorded successfully! New stock level: {item.current_stock} {item.unit}', 'success')
+        return redirect(url_for('inventory_item_detail', item_id=item_id))
+    
+    return render_template('stock_movement_form.html', item=item)
+
+@app.route('/inventory/low-stock')
+@login_required
+def low_stock_report():
+    """Show items with low or no stock"""
+    items = db.session.query(InventoryItem)\
+        .filter_by(is_active=True)\
+        .filter(InventoryItem.current_stock <= InventoryItem.minimum_stock)\
+        .order_by(InventoryItem.current_stock.asc()).all()
+    
+    return render_template('low_stock_report.html', items=items)
 
 @app.template_filter('nz_currency')
 def nz_currency_filter(amount):

@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.name }} - Inventory Details{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header with Back Button -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            <a href="{{ url_for('inventory') }}" class="text-gray-500 hover:text-gray-700 mr-4">
+                <i data-feather="arrow-left" class="h-6 w-6"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ item.name }}</h1>
+                <p class="text-gray-600 mt-1">{{ item.description or 'No description' }}</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" class="btn-primary">
+                <i data-feather="plus-circle" class="inline h-4 w-4 mr-2"></i>
+                Add Movement
+            </a>
+        </div>
+    </div>
+
+    <!-- Item Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Current Stock -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100">
+                    <i data-feather="package" class="h-6 w-6 text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Current Stock</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ item.current_stock }} {{ item.unit }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Value -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100">
+                    <i data-feather="dollar-sign" class="h-6 w-6 text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Stock Value</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ item.total_value | nz_currency }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unit Cost -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100">
+                    <i data-feather="tag" class="h-6 w-6 text-purple-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Unit Cost</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ item.unit_cost | nz_currency }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Status -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full 
+                    {% if item.stock_status == 'out_of_stock' %}bg-red-100{% elif item.stock_status == 'low_stock' %}bg-orange-100{% else %}bg-green-100{% endif %}">
+                    {% if item.stock_status == 'out_of_stock' %}
+                        <i data-feather="x-circle" class="h-6 w-6 text-red-600"></i>
+                    {% elif item.stock_status == 'low_stock' %}
+                        <i data-feather="alert-triangle" class="h-6 w-6 text-orange-600"></i>
+                    {% else %}
+                        <i data-feather="check-circle" class="h-6 w-6 text-green-600"></i>
+                    {% endif %}
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Status</p>
+                    <p class="text-lg font-bold 
+                        {% if item.stock_status == 'out_of_stock' %}text-red-600{% elif item.stock_status == 'low_stock' %}text-orange-600{% else %}text-green-600{% endif %}">
+                        {% if item.stock_status == 'out_of_stock' %}Out of Stock{% elif item.stock_status == 'low_stock' %}Low Stock{% else %}In Stock{% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Item Details -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Item Details</h3>
+                <dl class="space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Category</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ item.category.title() }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Unit of Measurement</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ item.unit }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Minimum Stock Level</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ item.minimum_stock }} {{ item.unit }}</dd>
+                    </div>
+                    {% if item.supplier %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Supplier</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ item.supplier }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if item.supplier_code %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Supplier Code</dt>
+                        <dd class="mt-1 text-sm text-gray-900 font-mono">{{ item.supplier_code }}</dd>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Date Added</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ item.date_created | nz_date }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Stock Movements History -->
+        <div class="lg:col-span-2 bg-white rounded-lg shadow">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Stock Movements</h3>
+                
+                {% if movements %}
+                <div class="space-y-4">
+                    {% for movement in movements %}
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                {% if movement.movement_type == 'in' %}
+                                    <div class="p-2 rounded-full bg-green-100">
+                                        <i data-feather="plus-circle" class="h-4 w-4 text-green-600"></i>
+                                    </div>
+                                {% elif movement.movement_type == 'out' %}
+                                    <div class="p-2 rounded-full bg-red-100">
+                                        <i data-feather="minus-circle" class="h-4 w-4 text-red-600"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="p-2 rounded-full bg-blue-100">
+                                        <i data-feather="edit" class="h-4 w-4 text-blue-600"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4">
+                                <div class="flex items-center">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {% if movement.movement_type == 'in' %}Stock In{% elif movement.movement_type == 'out' %}Stock Out{% else %}Adjustment{% endif %}
+                                    </p>
+                                    <span class="ml-2 text-sm font-bold 
+                                        {% if movement.movement_type == 'in' %}text-green-600{% elif movement.movement_type == 'out' %}text-red-600{% else %}text-blue-600{% endif %}">
+                                        {% if movement.movement_type == 'out' %}{{ movement.quantity }}{% else %}+{{ movement.quantity }}{% endif %} {{ item.unit }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center mt-1 text-xs text-gray-500">
+                                    <span>{{ movement.date_created.strftime('%d/%m/%Y %H:%M') }}</span>
+                                    {% if movement.reference_type %}
+                                        <span class="mx-1">•</span>
+                                        <span class="capitalize">{{ movement.reference_type.replace('_', ' ') }}</span>
+                                    {% endif %}
+                                    {% if movement.created_by %}
+                                        <span class="mx-1">•</span>
+                                        <span>{{ movement.created_by }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if movement.notes %}
+                                <p class="mt-1 text-xs text-gray-600">{{ movement.notes }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            {% if movement.unit_cost %}
+                            <p class="text-sm font-medium text-gray-900">{{ movement.unit_cost | nz_currency }}</p>
+                            <p class="text-xs text-gray-500">per {{ item.unit }}</p>
+                            {% endif %}
+                            {% if movement.movement_value > 0 %}
+                            <p class="text-xs font-medium text-gray-700 mt-1">
+                                Value: {{ movement.movement_value | nz_currency }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if movements|length == 20 %}
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-gray-500">Showing recent 20 movements</p>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <!-- No movements yet -->
+                <div class="text-center py-8">
+                    <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                        <i data-feather="activity" class="h-8 w-8 text-gray-400"></i>
+                    </div>
+                    <h4 class="text-lg font-medium text-gray-900 mb-2">No stock movements yet</h4>
+                    <p class="text-gray-500 mb-4">Start tracking stock changes for this item.</p>
+                    <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" class="btn-primary">
+                        <i data-feather="plus-circle" class="inline h-4 w-4 mr-2"></i>
+                        Add First Movement
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Level Alert -->
+    {% if item.stock_status in ['low_stock', 'out_of_stock'] %}
+    <div class="mt-8 {% if item.stock_status == 'out_of_stock' %}bg-red-50 border-red-200{% else %}bg-orange-50 border-orange-200{% endif %} border rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                {% if item.stock_status == 'out_of_stock' %}
+                    <i data-feather="x-circle" class="h-5 w-5 text-red-600"></i>
+                {% else %}
+                    <i data-feather="alert-triangle" class="h-5 w-5 text-orange-600"></i>
+                {% endif %}
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium {% if item.stock_status == 'out_of_stock' %}text-red-800{% else %}text-orange-800{% endif %}">
+                    {% if item.stock_status == 'out_of_stock' %}Out of Stock Alert{% else %}Low Stock Alert{% endif %}
+                </h3>
+                <div class="mt-2 text-sm {% if item.stock_status == 'out_of_stock' %}text-red-700{% else %}text-orange-700{% endif %}">
+                    <p>
+                        {% if item.stock_status == 'out_of_stock' %}
+                            This item is completely out of stock. Consider restocking immediately.
+                        {% else %}
+                            Current stock ({{ item.current_stock }} {{ item.unit }}) is below the minimum level ({{ item.minimum_stock }} {{ item.unit }}).
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('add_stock_movement', item_id=item.id) }}" 
+                       class="{% if item.stock_status == 'out_of_stock' %}btn-red{% else %}btn-orange{% endif %}">
+                        <i data-feather="plus-circle" class="inline h-4 w-4 mr-2"></i>
+                        Add Stock
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+</script>
+
+<style>
+.btn-red {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500;
+}
+
+.btn-orange {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500;
+}
+</style>
+{% endblock %}

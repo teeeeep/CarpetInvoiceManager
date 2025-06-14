@@ -85,3 +85,65 @@ class FileStore(db.Model):
     
     def __repr__(self):
         return f'<FileStore {self.file_path}>'
+
+class InventoryItem(db.Model):
+    """Inventory item model for carpet materials and supplies"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(500))
+    category = db.Column(db.String(100), nullable=False)  # carpet, underlay, tools, adhesive, etc.
+    unit = db.Column(db.String(50), nullable=False)  # m², linear metres, pieces, litres, etc.
+    unit_cost = db.Column(db.Float, nullable=False, default=0.0)
+    current_stock = db.Column(db.Float, nullable=False, default=0.0)
+    minimum_stock = db.Column(db.Float, nullable=False, default=0.0)
+    supplier = db.Column(db.String(200))
+    supplier_code = db.Column(db.String(100))
+    date_created = db.Column(db.Date, nullable=False, default=datetime.now().date)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    
+    # Relationships
+    stock_movements = relationship("StockMovement", back_populates="inventory_item", cascade="all, delete-orphan")
+    
+    @property
+    def stock_status(self):
+        """Return stock status based on current stock vs minimum stock"""
+        if self.current_stock <= 0:
+            return 'out_of_stock'
+        elif self.current_stock <= self.minimum_stock:
+            return 'low_stock'
+        else:
+            return 'in_stock'
+    
+    @property
+    def total_value(self):
+        """Calculate total value of current stock"""
+        return self.current_stock * self.unit_cost
+    
+    def __repr__(self):
+        return f'<InventoryItem {self.name}>'
+
+class StockMovement(db.Model):
+    """Stock movement model for tracking inventory changes"""
+    id = db.Column(db.Integer, primary_key=True)
+    inventory_item_id = db.Column(db.Integer, ForeignKey('inventory_item.id'), nullable=False)
+    movement_type = db.Column(db.String(20), nullable=False)  # 'in', 'out', 'adjustment'
+    quantity = db.Column(db.Float, nullable=False)
+    unit_cost = db.Column(db.Float)  # Cost at time of movement
+    reference_type = db.Column(db.String(50))  # 'job', 'purchase', 'adjustment', 'waste'
+    reference_id = db.Column(db.Integer)  # ID of related job, purchase order, etc.
+    notes = db.Column(db.String(500))
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    created_by = db.Column(db.String(100))  # User who made the movement
+    
+    # Relationships
+    inventory_item = relationship("InventoryItem", back_populates="stock_movements")
+    
+    @property
+    def movement_value(self):
+        """Calculate value of this movement"""
+        if self.unit_cost:
+            return abs(self.quantity) * self.unit_cost
+        return 0.0
+    
+    def __repr__(self):
+        return f'<StockMovement {self.movement_type} {self.quantity} of {self.inventory_item.name}>'
