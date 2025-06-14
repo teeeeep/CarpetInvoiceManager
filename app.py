@@ -393,27 +393,84 @@ def add_inventory_item():
             supplier_code=request.form.get('supplier_code')
         )
         db.session.add(item)
-        db.session.flush()  # Get the ID
-        
-        # Create initial stock movement if there's initial stock
-        initial_stock = float(request.form.get('current_stock', 0))
-        if initial_stock > 0:
-            movement = StockMovement(
-                inventory_item_id=item.id,
-                movement_type='in',
-                quantity=initial_stock,
-                unit_cost=item.unit_cost,
-                reference_type='initial_stock',
-                notes='Initial stock entry',
-                created_by='admin'
-            )
-            db.session.add(movement)
-        
         db.session.commit()
         flash('Inventory item added successfully!', 'success')
         return redirect(url_for('inventory'))
     
     return render_template('inventory_item_form.html')
+
+@app.route('/inventory/import', methods=['GET', 'POST'])
+@login_required
+def import_inventory_csv():
+    """Import inventory items from CSV"""
+    if request.method == 'POST':
+        if 'csv_file' not in request.files:
+            flash('No file selected!', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        if file.filename == '':
+            flash('No file selected!', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.endswith('.csv'):
+            try:
+                import csv
+                import io
+                
+                # Read CSV content
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.DictReader(stream)
+                
+                items_added = 0
+                errors = []
+                
+                for row_num, row in enumerate(csv_input, start=2):
+                    try:
+                        # Check required fields
+                        if not row.get('name') or not row.get('category') or not row.get('unit'):
+                            errors.append(f"Row {row_num}: Missing required fields (name, category, unit)")
+                            continue
+                        
+                        # Create inventory item
+                        item = InventoryItem(
+                            name=row.get('name', '').strip(),
+                            description=row.get('description', '').strip(),
+                            category=row.get('category', '').strip().lower(),
+                            unit=row.get('unit', '').strip(),
+                            unit_cost=float(row.get('unit_cost', 0) or 0),
+                            current_stock=float(row.get('current_stock', 0) or 0),
+                            minimum_stock=float(row.get('minimum_stock', 0) or 0),
+                            supplier=row.get('supplier', '').strip() or None,
+                            supplier_code=row.get('supplier_code', '').strip() or None
+                        )
+                        
+                        db.session.add(item)
+                        items_added += 1
+                        
+                    except ValueError as e:
+                        errors.append(f"Row {row_num}: Invalid number format - {str(e)}")
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: {str(e)}")
+                
+                if items_added > 0:
+                    db.session.commit()
+                    flash(f'Successfully imported {items_added} inventory items!', 'success')
+                else:
+                    db.session.rollback()
+                
+                if errors:
+                    flash(f'Errors encountered: {"; ".join(errors[:5])}', 'warning')
+                
+            except Exception as e:
+                db.session.rollback()
+                flash(f'Error processing CSV file: {str(e)}', 'error')
+        else:
+            flash('Please upload a valid CSV file!', 'error')
+            
+        return redirect(url_for('inventory'))
+    
+    return render_template('inventory_import.html')
 
 @app.route('/inventory/<int:item_id>')
 @login_required

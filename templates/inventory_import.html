@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Import Inventory - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center mb-8">
+        <a href="{{ url_for('inventory') }}" class="text-gray-500 hover:text-gray-700 mr-4">
+            <i data-feather="arrow-left" class="h-6 w-6"></i>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Import Inventory Items</h1>
+            <p class="mt-2 text-gray-600">Upload a CSV file to bulk import inventory items</p>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Upload CSV File</h2>
+            
+            <form action="{{ url_for('import_inventory_csv') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label for="csv_file" class="block text-sm font-medium text-gray-700 mb-2">
+                        CSV File <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file" 
+                           id="csv_file" 
+                           name="csv_file" 
+                           accept=".csv"
+                           required
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="mt-1 text-sm text-gray-500">Upload a CSV file with your inventory items</p>
+                </div>
+
+                <div class="flex gap-4">
+                    <a href="{{ url_for('inventory') }}" class="btn-secondary">
+                        <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i data-feather="upload" class="inline h-4 w-4 mr-2"></i>
+                        Import Items
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CSV Format Guide -->
+    <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="info" class="h-5 w-5 text-blue-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">CSV Format Requirements</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <p class="mb-3">Your CSV file must include the following columns (header row required):</p>
+                    
+                    <div class="bg-white rounded border p-3 mb-3">
+                        <code class="text-xs">name,description,category,unit,unit_cost,current_stock,minimum_stock,supplier,supplier_code</code>
+                    </div>
+
+                    <p class="font-medium mb-2">Required columns:</p>
+                    <ul class="list-disc pl-5 space-y-1 mb-4">
+                        <li><strong>name</strong> - Item name (e.g., "Wool Carpet - Beige")</li>
+                        <li><strong>category</strong> - Item category (carpet, underlay, adhesive, tools, supplies, other)</li>
+                        <li><strong>unit</strong> - Unit of measurement (m², m, pieces, litres, kg, rolls)</li>
+                    </ul>
+
+                    <p class="font-medium mb-2">Optional columns:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>description</strong> - Item description</li>
+                        <li><strong>unit_cost</strong> - Cost per unit in NZD (default: 0)</li>
+                        <li><strong>current_stock</strong> - Current stock level (default: 0)</li>
+                        <li><strong>minimum_stock</strong> - Minimum stock alert level (default: 0)</li>
+                        <li><strong>supplier</strong> - Supplier name</li>
+                        <li><strong>supplier_code</strong> - Supplier product code</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sample CSV Download -->
+    <div class="mt-6 bg-green-50 border border-green-200 rounded-lg p-6">
+        <div class="flex items-center justify-between">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i data-feather="download" class="h-5 w-5 text-green-600"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-green-800">Sample CSV Template</h3>
+                    <p class="text-sm text-green-700">Download a sample CSV file to use as a template</p>
+                </div>
+            </div>
+            <button onclick="downloadSampleCSV()" class="btn-green">
+                <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                Download Sample
+            </button>
+        </div>
+    </div>
+
+    <!-- Import Tips -->
+    <div class="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-feather="lightbulb" class="h-5 w-5 text-gray-600"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-gray-800">Import Tips</h3>
+                <div class="mt-2 text-sm text-gray-700">
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>Save your spreadsheet as CSV format before uploading</li>
+                        <li>Ensure no empty rows between data entries</li>
+                        <li>Use consistent category names (lowercase preferred)</li>
+                        <li>Double-check unit costs are in NZD format (no currency symbols)</li>
+                        <li>Inventory items with duplicate names will be created as separate entries</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+
+    // Generate and download sample CSV
+    function downloadSampleCSV() {
+        const sampleData = [
+            ['name', 'description', 'category', 'unit', 'unit_cost', 'current_stock', 'minimum_stock', 'supplier', 'supplier_code'],
+            ['Wool Carpet - Beige', 'High-quality wool carpet for residential areas', 'carpet', 'm²', '45.50', '100', '20', 'Auckland Carpet Supplies', 'WC-BG-001'],
+            ['Carpet Underlay', 'Standard underlay for carpet installation', 'underlay', 'm²', '12.00', '150', '30', 'Auckland Carpet Supplies', 'UL-STD-001'],
+            ['Carpet Adhesive', 'Professional grade carpet adhesive', 'adhesive', 'litres', '28.50', '25', '5', 'Builder Supplies Ltd', 'ADH-PRO-500'],
+            ['Carpet Knife', 'Professional carpet cutting knife', 'tools', 'pieces', '35.00', '5', '2', 'Tool Depot', 'TK-PRO-001'],
+            ['Carpet Strips', 'Transition strips for carpet edges', 'supplies', 'm', '8.75', '50', '10', 'Flooring Solutions', 'CS-2M-001']
+        ];
+
+        const csvContent = sampleData.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sample_inventory.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const fileInput = document.getElementById('csv_file');
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select a CSV file to upload.');
+            return;
+        }
+
+        const file = fileInput.files[0];
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            e.preventDefault();
+            alert('Please upload a valid CSV file.');
+            return;
+        }
+
+        // Add loading state
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.disabled = true;
+        button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Importing...';
+        
+        // Re-enable button after timeout as fallback
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+            feather.replace();
+        }, 30000);
+    });
+</script>
+
+<style>
+.btn-green {
+    @apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500;
+}
+</style>
+{% endblock %}

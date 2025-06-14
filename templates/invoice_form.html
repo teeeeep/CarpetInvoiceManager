@@ -250,5 +250,32 @@
         calculateTotals();
         feather.replace();
     });
+    
+    // Function to populate invoice fields from inventory selection
+    function populateFromInventory(selectElement) {
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        if (selectedOption.value) {
+            const description = selectedOption.dataset.description;
+            const price = selectedOption.dataset.price;
+            
+            // Find the parent invoice line
+            const invoiceLine = selectElement.closest('.invoice-line');
+            
+            // Populate description field
+            const descriptionField = invoiceLine.querySelector('.description-field');
+            if (descriptionField && description) {
+                descriptionField.value = description;
+            }
+            
+            // Populate unit price field
+            const priceField = invoiceLine.querySelector('.unit-price');
+            if (priceField && price) {
+                priceField.value = parseFloat(price).toFixed(2);
+            }
+            
+            // Trigger calculation
+            calculateTotals();
+        }
+    }
 </script>
 {% endblock %}
