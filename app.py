@@ -276,28 +276,34 @@ def invoice_pdf(invoice_id):
         flash('Invoice not found!', 'error')
         return redirect(url_for('invoices'))
     
-    # Render HTML for PDF
-    html_content = render_template('invoice_pdf.html', invoice=invoice)
-    
-    # Generate PDF
-    pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
-    
-    # Save to FileStore
-    filename = f"invoice_{invoice.invoice_code}.pdf"
-    file_store = FileStore(
-        invoice_id=invoice.id,
-        file_path=filename,
-        date_generated=datetime.now()
-    )
-    db.session.add(file_store)
-    db.session.commit()
-    
-    # Return PDF response
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-    
-    return response
+    try:
+        # Render HTML for PDF
+        html_content = render_template('invoice_pdf.html', invoice=invoice)
+        
+        # Generate PDF
+        pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
+        
+        # Save to FileStore
+        filename = f"invoice_{invoice.invoice_code}.pdf"
+        file_store = FileStore(
+            invoice_id=invoice.id,
+            file_path=filename,
+            date_generated=datetime.now()
+        )
+        db.session.add(file_store)
+        db.session.commit()
+        
+        # Return PDF response
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        app.logger.error(f"PDF generation error: {str(e)}")
+        flash(f'Error generating PDF: {str(e)}', 'error')
+        return redirect(url_for('invoice_preview', invoice_id=invoice_id))
 
 @app.route('/invoice/<int:invoice_id>/email')
 @login_required
