@@ -13,11 +13,11 @@
     <!-- Form -->
     <div class="bg-white rounded-lg shadow">
         <form action="{{ url_for('add_job') }}" method="POST" class="p-6 space-y-6">
-            
+
             <!-- Property Address Section -->
             <div class="border-b pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Property Address</h3>
-                
+
                 <!-- Street Address -->
                 <div class="mb-4">
                     <label for="street_address" class="block text-sm font-medium text-gray-700 mb-2">
@@ -40,12 +40,12 @@
                             Suburb <span class="text-red-500">*</span>
                         </label>
                         <input type="text" 
-                               id="suburb" 
-                               name="suburb" 
-                               required
-                               class="form-input touch-input"
-                               placeholder="e.g., Auckland Central"
-                               value="{{ request.form.get('suburb', '') }}">
+                           id="suburb" 
+                           name="suburb" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., Ponsonby"
+                           value="{{ request.form.get('suburb', job.suburb if job else '') }}">
                     </div>
 
                     <!-- Town/City -->
@@ -54,12 +54,12 @@
                             Town/City <span class="text-red-500">*</span>
                         </label>
                         <input type="text" 
-                               id="town_city" 
-                               name="town_city" 
-                               required
-                               class="form-input touch-input"
-                               placeholder="e.g., Auckland"
-                               value="{{ request.form.get('town_city', '') }}">
+                           id="town_city" 
+                           name="town_city" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., Auckland"
+                           value="{{ request.form.get('town_city', job.town_city if job else '') }}">
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
             <!-- Retailer Section -->
             <div class="border-b pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Retailer Information</h3>
-                
+
                 <!-- Retailer Selection -->
                 <div>
                     <label for="retailer_id" class="block text-sm font-medium text-gray-700 mb-2">
@@ -79,10 +79,10 @@
                             class="form-select touch-input">
                         <option value="">Choose a retailer...</option>
                         {% for retailer in retailers %}
-                        <option value="{{ retailer.id }}" 
-                                {% if request.form.get('retailer_id') and request.form.get('retailer_id')|int == retailer.id %}selected{% endif %}>
-                            {{ retailer.name }} ({{ retailer.email }})
-                        </option>
+                            <option value="{{ retailer.id }}" 
+                                    {% if (request.form.get('retailer_id') == retailer.id|string) or (job and job.retailer_id == retailer.id) %}selected{% endif %}>
+                                {{ retailer.name }}
+                            </option>
                         {% endfor %}
                     </select>
                     <p class="mt-1 text-sm text-gray-500">
@@ -99,7 +99,7 @@
             <!-- Homeowner Section -->
             <div class="border-b pb-6">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Homeowner Details</h3>
-                
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Homeowner Name -->
                     <div>
@@ -107,12 +107,12 @@
                             Homeowner Name <span class="text-red-500">*</span>
                         </label>
                         <input type="text" 
-                               id="homeowner_name" 
-                               name="homeowner_name" 
-                               required
-                               class="form-input touch-input"
-                               placeholder="e.g., John Smith"
-                               value="{{ request.form.get('homeowner_name', '') }}">
+                           id="homeowner_name" 
+                           name="homeowner_name" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., John Smith"
+                           value="{{ request.form.get('homeowner_name', job.homeowner_name if job else '') }}">
                     </div>
 
                     <!-- Homeowner Phone -->
@@ -121,12 +121,12 @@
                             Phone Number <span class="text-red-500">*</span>
                         </label>
                         <input type="tel" 
-                               id="homeowner_phone" 
-                               name="homeowner_phone" 
-                               required
-                               class="form-input touch-input"
-                               placeholder="e.g., 021-123-4567"
-                               value="{{ request.form.get('homeowner_phone', '') }}">
+                           id="homeowner_phone" 
+                           name="homeowner_phone" 
+                           required
+                           class="form-input touch-input"
+                           placeholder="e.g., 021-123-4567"
+                           value="{{ request.form.get('homeowner_phone', job.homeowner_phone if job else '') }}">
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@
             <!-- Job Details Section -->
             <div>
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Job Details</h3>
-                
+
                 <!-- Date Completed -->
                 <div>
                     <label for="date_completed" class="block text-sm font-medium text-gray-700 mb-2">
@@ -212,13 +212,13 @@
 <script>
     // Initialize Feather icons
     feather.replace();
-    
+
     // Auto-focus the street address field
     document.getElementById('street_address').focus();
-    
+
     // Set default date to today
     document.getElementById('date_completed').valueAsDate = new Date();
-    
+
     // Form validation
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
@@ -229,32 +229,32 @@
         const homeownerName = document.getElementById('homeowner_name').value.trim();
         const homeownerPhone = document.getElementById('homeowner_phone').value.trim();
         const dateCompleted = document.getElementById('date_completed').value;
-        
+
         if (!streetAddress || !suburb || !townCity || !retailerId || !homeownerName || !homeownerPhone || !dateCompleted) {
             e.preventDefault();
             alert('Please fill in all required fields.');
             return;
         }
-        
+
         // Check if date is not in the future
         const selectedDate = new Date(dateCompleted);
         const today = new Date();
         today.setHours(23, 59, 59, 999); // End of today
-        
+
         if (selectedDate > today) {
             e.preventDefault();
             alert('Date completed cannot be in the future.');
             document.getElementById('date_completed').focus();
             return;
         }
-        
+
         // Add loading state to button
         const button = this.querySelector('button[type="submit"]');
         const originalText = button.innerHTML;
-        
+
         button.disabled = true;
         button.innerHTML = '<i data-feather="loader" class="inline h-4 w-4 mr-2 animate-spin"></i>Saving...';
-        
+
         // Re-enable button after 10 seconds as fallback
         setTimeout(() => {
             button.disabled = false;
@@ -262,25 +262,25 @@
             feather.replace();
         }, 10000);
     });
-    
+
     // Format phone number as user types
     document.getElementById('homeowner_phone').addEventListener('input', function(e) {
         let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
-        
+
         // Format as XXX-XXX-XXXX for NZ numbers
         if (value.length >= 6) {
             value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6, 10);
         } else if (value.length >= 4) {
             value = value.substring(0, 3) + '-' + value.substring(3);
         }
-        
+
         e.target.value = value;
     });
-    
+
     // Auto-complete suburb based on town/city
     const suburbInput = document.getElementById('suburb');
     const townCityInput = document.getElementById('town_city');
-    
+
     townCityInput.addEventListener('blur', function() {
         const city = this.value.toLowerCase();
         if (city === 'auckland' && !suburbInput.value) {
@@ -294,19 +294,19 @@
             suburbInput.placeholder = 'e.g., Christchurch Central, Riccarton, Fendalton';
         }
     });
-    
+
     // Address validation helper
     function validateNZAddress() {
         const streetAddress = document.getElementById('street_address').value;
         const hasNumber = /\d/.test(streetAddress);
-        
+
         if (streetAddress && !hasNumber) {
             alert('Street address should include a street number (e.g., "123 Queen Street")');
             return false;
         }
         return true;
     }
-    
+
     document.getElementById('street_address').addEventListener('blur', validateNZAddress);
 </script>
 {% endblock %}

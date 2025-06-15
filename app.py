@@ -204,6 +204,51 @@ def add_job():
     retailers = db.session.query(Retailer).all()
     return render_template('job_form.html', retailers=retailers)
 
+@app.route('/job/<int:job_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    """Edit existing job"""
+    job = db.session.get(Job, job_id)
+    if not job:
+        flash('Job not found!', 'error')
+        return redirect(url_for('jobs'))
+
+    if request.method == 'POST':
+        job.street_address = request.form.get('street_address')
+        job.suburb = request.form.get('suburb')
+        job.town_city = request.form.get('town_city')
+        job.retailer_id = request.form.get('retailer_id')
+        job.homeowner_name = request.form.get('homeowner_name')
+        job.homeowner_phone = request.form.get('homeowner_phone')
+        job.date_completed = datetime.strptime(request.form.get('date_completed'), '%Y-%m-%d').date()
+        
+        db.session.commit()
+        flash('Job updated successfully!', 'success')
+        return redirect(url_for('jobs'))
+
+    retailers = db.session.query(Retailer).all()
+    return render_template('job_form.html', job=job, retailers=retailers)
+
+@app.route('/job/<int:job_id>/delete', methods=['POST'])
+@login_required
+def delete_job(job_id):
+    """Delete job and associated invoices"""
+    job = db.session.get(Job, job_id)
+    if not job:
+        flash('Job not found!', 'error')
+        return redirect(url_for('jobs'))
+
+    # Check if job has invoices
+    if job.invoices:
+        flash(f'Cannot delete job: {len(job.invoices)} invoice(s) are associated with this job. Delete invoices first.', 'error')
+        return redirect(url_for('jobs'))
+
+    job_address = job.street_address
+    db.session.delete(job)
+    db.session.commit()
+    flash(f'Job at {job_address} deleted successfully!', 'success')
+    return redirect(url_for('jobs'))
+
 @app.route('/invoices')
 @login_required
 def invoices():
