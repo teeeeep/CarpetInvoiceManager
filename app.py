@@ -757,6 +757,72 @@ def accounts_receivable_report():
                          summary=summary,
                          report_date=current_date)
 
+@app.route('/reports/accounts-receivable/pdf')
+@login_required
+def accounts_receivable_report_pdf():
+    """Export accounts receivable report as PDF"""
+    from datetime import datetime, timedelta
+    
+    current_date = datetime.now().date()
+    
+    # Get all outstanding invoices (same logic as the regular report)
+    outstanding_invoices = db.session.query(Invoice)\
+        .join(Job)\
+        .join(Retailer)\
+        .filter(Invoice.status.in_(['draft', 'sent']))\
+        .order_by(Retailer.name, Invoice.date_created)\
+        .all()
+    
+    # Group by retailer
+    retailer_data = {}
+    summary = {
+        'total_outstanding': 0,
+        'current': 0,
+        'days_31_60': 0,
+        'days_60_plus': 0
+    }
+    
+    for invoice in outstanding_invoices:
+        retailer_name = invoice.job.retailer.name
+        if retailer_name not in retailer_data:
+            retailer_data[retailer_name] = []
+        
+        retailer_data[retailer_name].append(invoice)
+        
+        # Calculate aging
+        days_outstanding = (current_date - invoice.date_created).days
+        summary['total_outstanding'] += invoice.total
+        
+        if days_outstanding <= 30:
+            summary['current'] += invoice.total
+        elif days_outstanding <= 60:
+            summary['days_31_60'] += invoice.total
+        else:
+            summary['days_60_plus'] += invoice.total
+    
+    try:
+        # Render HTML for PDF
+        html_content = render_template('accounts_receivable_report_pdf.html',
+                                     retailer_data=retailer_data,
+                                     summary=summary,
+                                     report_date=current_date)
+        
+        # Generate PDF
+        pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
+        
+        # Return PDF response
+        filename = f"accounts_receivable_report_{current_date.strftime('%Y%m%d')}.pdf"
+        response = make_response(pdf)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        app.logger.error(f"PDF generation error: {str(e)}")
+        flash(f'Error generating PDF: {str(e)}', 'error')
+        return redirect(url_for('accounts_receivable_report'))
+
 @app.route('/reports/sales-summary')
 @login_required
 def sales_summary_report():

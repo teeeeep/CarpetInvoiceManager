@@ -16,9 +16,16 @@
                 <p class="text-gray-600 mt-1">Outstanding invoices by retailer and aging</p>
             </div>
         </div>
-        <div class="text-right">
-            <p class="text-sm text-gray-500">Report Date</p>
-            <p class="text-lg font-medium text-gray-900">{{ report_date.strftime('%d/%m/%Y') }}</p>
+        <div class="flex items-center space-x-4">
+            <a href="{{ url_for('accounts_receivable_report_pdf') }}" 
+               class="btn-secondary flex items-center no-print">
+                <i data-feather="download" class="h-4 w-4 mr-2"></i>
+                Export PDF
+            </a>
+            <div class="text-right">
+                <p class="text-sm text-gray-500">Report Date</p>
+                <p class="text-lg font-medium text-gray-900">{{ report_date.strftime('%d/%m/%Y') }}</p>
+            </div>
         </div>
     </div>
 

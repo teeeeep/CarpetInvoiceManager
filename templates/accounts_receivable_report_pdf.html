@@ -1,0 +1,257 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts Receivable Report - {{ report_date.strftime('%d/%m/%Y') }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 2cm;
+            @top-center {
+                content: "Accounts Receivable Report - {{ report_date.strftime('%d/%m/%Y') }}";
+                font-size: 10pt;
+                color: #666;
+            }
+            @bottom-center {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 10pt;
+                color: #666;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .report-header {
+            border-bottom: 2px solid #0891b2;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .company-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .report-title {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .summary-cards {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .summary-card {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .summary-card.current {
+            background-color: #f0f9ff;
+            border-color: #0891b2;
+        }
+
+        .summary-card.overdue {
+            background-color: #fff7ed;
+            border-color: #ea580c;
+        }
+
+        .summary-card.past-due {
+            background-color: #fef2f2;
+            border-color: #dc2626;
+        }
+
+        .summary-amount {
+            font-size: 16pt;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 9pt;
+        }
+
+        .report-table th,
+        .report-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .report-table th {
+            background-color: #f8fafc;
+            font-weight: bold;
+            border-bottom: 2px solid #0891b2;
+        }
+
+        .report-table .text-right {
+            text-align: right;
+        }
+
+        .retailer-group {
+            background-color: #f8fafc;
+            font-weight: bold;
+        }
+
+        .aging-current {
+            color: #0f766e;
+            font-weight: bold;
+        }
+
+        .aging-overdue {
+            color: #c2410c;
+            font-weight: bold;
+        }
+
+        .aging-past-due {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 8pt;
+            color: #666;
+            text-align: center;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- Company Header -->
+        <div class="report-header">
+            <div class="company-info">
+                <h1 style="margin: 0; color: #0891b2; font-size: 24pt;">Carpet Invoices</h1>
+                <p style="margin: 5px 0;">Professional Carpet Installation Services</p>
+                <p style="margin: 5px 0;">New Zealand</p>
+            </div>
+            <div class="report-title">
+                <h2 style="margin: 0; color: #0891b2;">Accounts Receivable Report</h2>
+                <p style="margin: 5px 0;">Outstanding Invoices by Retailer and Aging</p>
+                <p style="margin: 5px 0; font-weight: bold;">Report Date: {{ report_date.strftime('%d/%m/%Y') }}</p>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div>Total Outstanding</div>
+                <div class="summary-amount">${{ "%.2f"|format(summary.total_outstanding) }}</div>
+            </div>
+            <div class="summary-card current">
+                <div>Current (0-30 days)</div>
+                <div class="summary-amount">${{ "%.2f"|format(summary.current) }}</div>
+            </div>
+            <div class="summary-card overdue">
+                <div>31-60 days</div>
+                <div class="summary-amount">${{ "%.2f"|format(summary.days_31_60) }}</div>
+            </div>
+            <div class="summary-card past-due">
+                <div>60+ days</div>
+                <div class="summary-amount">${{ "%.2f"|format(summary.days_60_plus) }}</div>
+            </div>
+        </div>
+
+        <!-- Detailed Report -->
+        {% if retailer_data %}
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Retailer</th>
+                    <th>Invoice</th>
+                    <th>Property</th>
+                    <th class="text-right">Amount</th>
+                    <th>Date</th>
+                    <th class="text-right">Days Outstanding</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for retailer_name, invoices in retailer_data.items() %}
+                    {% for invoice in invoices %}
+                    <tr>
+                        <td>
+                            {% if loop.first %}
+                            <div style="font-weight: bold;">{{ retailer_name }}</div>
+                            <div style="font-size: 8pt; color: #666;">{{ invoice.job.retailer.email }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-weight: bold;">{{ invoice.invoice_code }}</div>
+                            <div style="font-size: 8pt; color: #666;">{{ invoice.status|title }}</div>
+                        </td>
+                        <td>
+                            <div>{{ invoice.job.street_address }}</div>
+                            <div style="font-size: 8pt; color: #666;">{{ invoice.job.suburb }}, {{ invoice.job.town_city }}</div>
+                        </td>
+                        <td class="text-right" style="font-weight: bold;">
+                            ${{ "%.2f"|format(invoice.total) }}
+                        </td>
+                        <td>
+                            {{ invoice.date_created.strftime('%d/%m/%Y') }}
+                        </td>
+                        <td class="text-right">
+                            {% set days_outstanding = (report_date - invoice.date_created).days %}
+                            <span class="
+                                {% if days_outstanding <= 30 %}aging-current
+                                {% elif days_outstanding <= 60 %}aging-overdue
+                                {% else %}aging-past-due{% endif %}">
+                                {{ days_outstanding }} days
+                            </span>
+                        </td>
+                        <td>
+                            {% set days_outstanding = (report_date - invoice.date_created).days %}
+                            {% if days_outstanding <= 30 %}
+                                Current
+                            {% elif days_outstanding <= 60 %}
+                                Overdue
+                            {% else %}
+                                Past Due
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="no-data">
+            <h3>All invoices paid</h3>
+            <p>No outstanding invoices at this time.</p>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This report was generated on {{ report_date.strftime('%d/%m/%Y') }} at {{ report_date.strftime('%H:%M') }} NZT</p>
+            <p>Carpet Invoices - Professional Carpet Installation Services</p>
+        </div>
+    </div>
+</body>
+</html>
