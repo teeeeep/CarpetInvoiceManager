@@ -1,0 +1,146 @@
+
+{% extends "base.html" %}
+
+{% block title %}Sales Summary Report - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center">
+            <a href="{{ url_for('reports') }}" class="text-gray-500 hover:text-gray-700 mr-4">
+                <i data-feather="arrow-left" class="h-6 w-6"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Sales Summary Report</h1>
+                <p class="text-gray-600 mt-1">Sales performance for {{ current_year }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Year Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100">
+                    <i data-feather="trending-up" class="h-6 w-6 text-green-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ current_year }} Total</p>
+                    <p class="text-2xl font-bold text-gray-900">${{ "%.2f"|format(current_year_total) }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100">
+                    <i data-feather="calendar" class="h-6 w-6 text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">{{ current_year - 1 }} Total</p>
+                    <p class="text-2xl font-bold text-gray-900">${{ "%.2f"|format(previous_year_total) }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full {% if current_year_total > previous_year_total %}bg-green-100{% else %}bg-red-100{% endif %}">
+                    <i data-feather="{% if current_year_total > previous_year_total %}arrow-up{% else %}arrow-down{% endif %}" 
+                       class="h-6 w-6 {% if current_year_total > previous_year_total %}text-green-600{% else %}text-red-600{% endif %}"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Year on Year</p>
+                    {% if previous_year_total > 0 %}
+                        {% set change_percent = ((current_year_total - previous_year_total) / previous_year_total * 100) %}
+                        <p class="text-2xl font-bold {% if change_percent > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ "%.1f"|format(change_percent) }}%
+                        </p>
+                    {% else %}
+                        <p class="text-2xl font-bold text-gray-900">N/A</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Sales Chart -->
+    <div class="bg-white rounded-lg shadow mb-8">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Monthly Sales - {{ current_year }}</h2>
+        </div>
+        <div class="p-6">
+            {% if monthly_sales %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoices</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for sale in monthly_sales %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][sale.month|int - 1] }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ "%.2f"|format(sale.total) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ sale.count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ "%.2f"|format(sale.total / sale.count) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">No sales data available for {{ current_year }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sales by Retailer -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Sales by Retailer - {{ current_year }}</h2>
+        </div>
+        <div class="p-6">
+            {% if retailer_sales %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retailer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoices</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Average Value</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for retailer in retailer_sales %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ retailer.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ "%.2f"|format(retailer.total) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ retailer.count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ "%.2f"|format(retailer.total / retailer.count) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 text-center py-8">No retailer sales data available for {{ current_year }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    feather.replace();
+</script>
+{% endblock %}

@@ -668,6 +668,276 @@ def nz_date_filter(date):
         return date.strftime('%d/%m/%Y')
     return ''
 
+# Reporting Routes
+
+@app.route('/reports')
+@login_required
+def reports():
+    """Reports dashboard"""
+    from sqlalchemy import func
+    from datetime import datetime, timedelta
+    
+    # Calculate quick stats for dashboard
+    current_date = datetime.now().date()
+    first_of_month = current_date.replace(day=1)
+    
+    # Total outstanding invoices
+    total_outstanding = db.session.query(func.sum(Invoice.total))\
+        .filter(Invoice.status.in_(['draft', 'sent']))\
+        .scalar() or 0
+    
+    # Monthly revenue (paid invoices this month)
+    monthly_revenue = db.session.query(func.sum(Invoice.total))\
+        .filter(Invoice.status == 'paid')\
+        .filter(Invoice.date_created >= first_of_month)\
+        .scalar() or 0
+    
+    # Active retailers (retailers with jobs this year)
+    year_start = current_date.replace(month=1, day=1)
+    active_retailers = db.session.query(func.count(func.distinct(Job.retailer_id)))\
+        .filter(Job.date_completed >= year_start)\
+        .scalar() or 0
+    
+    # Jobs this month
+    jobs_this_month = db.session.query(func.count(Job.id))\
+        .filter(Job.date_completed >= first_of_month)\
+        .scalar() or 0
+    
+    return render_template('reports.html',
+                         total_outstanding=total_outstanding,
+                         monthly_revenue=monthly_revenue,
+                         active_retailers=active_retailers,
+                         jobs_this_month=jobs_this_month)
+
+@app.route('/reports/accounts-receivable')
+@login_required
+def accounts_receivable_report():
+    """Accounts receivable aging report"""
+    from datetime import datetime, timedelta
+    
+    current_date = datetime.now().date()
+    
+    # Get all outstanding invoices
+    outstanding_invoices = db.session.query(Invoice)\
+        .join(Job)\
+        .join(Retailer)\
+        .filter(Invoice.status.in_(['draft', 'sent']))\
+        .order_by(Retailer.name, Invoice.date_created)\
+        .all()
+    
+    # Group by retailer
+    retailer_data = {}
+    summary = {
+        'total_outstanding': 0,
+        'current': 0,      # 0-30 days
+        'days_31_60': 0,   # 31-60 days
+        'days_60_plus': 0  # 60+ days
+    }
+    
+    for invoice in outstanding_invoices:
+        retailer_name = invoice.job.retailer.name
+        if retailer_name not in retailer_data:
+            retailer_data[retailer_name] = []
+        
+        retailer_data[retailer_name].append(invoice)
+        
+        # Calculate aging
+        days_outstanding = (current_date - invoice.date_created).days
+        summary['total_outstanding'] += invoice.total
+        
+        if days_outstanding <= 30:
+            summary['current'] += invoice.total
+        elif days_outstanding <= 60:
+            summary['days_31_60'] += invoice.total
+        else:
+            summary['days_60_plus'] += invoice.total
+    
+    return render_template('accounts_receivable_report.html',
+                         retailer_data=retailer_data,
+                         summary=summary,
+                         report_date=current_date)
+
+@app.route('/reports/sales-summary')
+@login_required
+def sales_summary_report():
+    """Sales summary report"""
+    from sqlalchemy import func, extract
+    from datetime import datetime, timedelta
+    
+    current_date = datetime.now().date()
+    current_year = current_date.year
+    
+    # Monthly sales for current year
+    monthly_sales = db.session.query(
+        extract('month', Invoice.date_created).label('month'),
+        func.sum(Invoice.total).label('total'),
+        func.count(Invoice.id).label('count')
+    ).filter(
+        extract('year', Invoice.date_created) == current_year,
+        Invoice.status == 'paid'
+    ).group_by(extract('month', Invoice.date_created)).all()
+    
+    # Sales by retailer
+    retailer_sales = db.session.query(
+        Retailer.name,
+        func.sum(Invoice.total).label('total'),
+        func.count(Invoice.id).label('count')
+    ).join(Job).join(Invoice)\
+    .filter(
+        extract('year', Invoice.date_created) == current_year,
+        Invoice.status == 'paid'
+    ).group_by(Retailer.name).all()
+    
+    # Year over year comparison
+    previous_year_total = db.session.query(func.sum(Invoice.total))\
+        .filter(
+            extract('year', Invoice.date_created) == current_year - 1,
+            Invoice.status == 'paid'
+        ).scalar() or 0
+    
+    current_year_total = db.session.query(func.sum(Invoice.total))\
+        .filter(
+            extract('year', Invoice.date_created) == current_year,
+            Invoice.status == 'paid'
+        ).scalar() or 0
+    
+    return render_template('sales_summary_report.html',
+                         monthly_sales=monthly_sales,
+                         retailer_sales=retailer_sales,
+                         current_year=current_year,
+                         current_year_total=current_year_total,
+                         previous_year_total=previous_year_total)
+
+@app.route('/reports/retailer-performance')
+@login_required
+def retailer_performance_report():
+    """Retailer performance report"""
+    from sqlalchemy import func
+    from datetime import datetime
+    
+    current_year = datetime.now().year
+    
+    # Performance by retailer
+    retailer_performance = db.session.query(
+        Retailer.name,
+        Retailer.email,
+        func.count(Job.id).label('total_jobs'),
+        func.count(Invoice.id).label('total_invoices'),
+        func.sum(Invoice.total).label('total_revenue'),
+        func.avg(Invoice.total).label('avg_invoice_value')
+    ).outerjoin(Job).outerjoin(Invoice)\
+    .filter(func.extract('year', Job.date_completed) == current_year)\
+    .group_by(Retailer.id, Retailer.name, Retailer.email)\
+    .order_by(func.sum(Invoice.total).desc())\
+    .all()
+    
+    return render_template('retailer_performance_report.html',
+                         retailer_performance=retailer_performance,
+                         current_year=current_year)
+
+@app.route('/reports/gst-summary')
+@login_required
+def gst_summary_report():
+    """GST summary report"""
+    from sqlalchemy import func, extract
+    from datetime import datetime
+    
+    current_date = datetime.now().date()
+    current_year = current_date.year
+    
+    # Quarterly GST summary
+    quarterly_gst = db.session.query(
+        func.floor((extract('month', Invoice.date_created) - 1) / 3 + 1).label('quarter'),
+        func.sum(Invoice.subtotal).label('total_sales'),
+        func.sum(Invoice.gst_amount).label('total_gst'),
+        func.count(Invoice.id).label('invoice_count')
+    ).filter(
+        extract('year', Invoice.date_created) == current_year
+    ).group_by(func.floor((extract('month', Invoice.date_created) - 1) / 3 + 1)).all()
+    
+    # Monthly GST breakdown
+    monthly_gst = db.session.query(
+        extract('month', Invoice.date_created).label('month'),
+        func.sum(Invoice.subtotal).label('subtotal'),
+        func.sum(Invoice.gst_amount).label('gst_amount'),
+        func.sum(Invoice.total).label('total')
+    ).filter(
+        extract('year', Invoice.date_created) == current_year
+    ).group_by(extract('month', Invoice.date_created)).all()
+    
+    return render_template('gst_summary_report.html',
+                         quarterly_gst=quarterly_gst,
+                         monthly_gst=monthly_gst,
+                         current_year=current_year)
+
+@app.route('/reports/job-analysis')
+@login_required
+def job_analysis_report():
+    """Job analysis report"""
+    from sqlalchemy import func
+    from datetime import datetime
+    
+    current_year = datetime.now().year
+    
+    # Jobs by location
+    jobs_by_suburb = db.session.query(
+        Job.suburb,
+        Job.town_city,
+        func.count(Job.id).label('job_count'),
+        func.sum(Invoice.total).label('total_value')
+    ).outerjoin(Invoice)\
+    .filter(func.extract('year', Job.date_completed) == current_year)\
+    .group_by(Job.suburb, Job.town_city)\
+    .order_by(func.count(Job.id).desc())\
+    .all()
+    
+    # Monthly job completion trends
+    monthly_jobs = db.session.query(
+        extract('month', Job.date_completed).label('month'),
+        func.count(Job.id).label('job_count'),
+        func.avg(Invoice.total).label('avg_value')
+    ).outerjoin(Invoice)\
+    .filter(func.extract('year', Job.date_completed) == current_year)\
+    .group_by(extract('month', Job.date_completed)).all()
+    
+    return render_template('job_analysis_report.html',
+                         jobs_by_suburb=jobs_by_suburb,
+                         monthly_jobs=monthly_jobs,
+                         current_year=current_year)
+
+@app.route('/reports/inventory-valuation')
+@login_required
+def inventory_valuation_report():
+    """Inventory valuation report"""
+    from sqlalchemy import func
+    
+    # Inventory by category
+    inventory_by_category = db.session.query(
+        InventoryItem.category,
+        func.count(InventoryItem.id).label('item_count'),
+        func.sum(InventoryItem.current_stock * InventoryItem.unit_cost).label('total_value'),
+        func.sum(InventoryItem.current_stock).label('total_stock')
+    ).filter(InventoryItem.is_active == True)\
+    .group_by(InventoryItem.category)\
+    .order_by(func.sum(InventoryItem.current_stock * InventoryItem.unit_cost).desc())\
+    .all()
+    
+    # Low stock items
+    low_stock_items = db.session.query(InventoryItem)\
+        .filter(InventoryItem.is_active == True)\
+        .filter(InventoryItem.current_stock <= InventoryItem.minimum_stock)\
+        .order_by(InventoryItem.current_stock.asc()).all()
+    
+    # Total inventory value
+    total_value = db.session.query(
+        func.sum(InventoryItem.current_stock * InventoryItem.unit_cost)
+    ).filter(InventoryItem.is_active == True).scalar() or 0
+    
+    return render_template('inventory_valuation_report.html',
+                         inventory_by_category=inventory_by_category,
+                         low_stock_items=low_stock_items,
+                         total_value=total_value)
+
 # Create tables
 with app.app_context():
     db.create_all()

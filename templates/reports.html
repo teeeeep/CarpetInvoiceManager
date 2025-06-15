@@ -1,0 +1,152 @@
+
+{% extends "base.html" %}
+
+{% block title %}Reports - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Business Reports</h1>
+        <p class="mt-2 text-gray-600">View financial summaries and business insights</p>
+    </div>
+
+    <!-- Report Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+        <!-- Accounts Receivable -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i data-feather="dollar-sign" class="h-6 w-6 text-blue-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Accounts Receivable</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Outstanding Invoices</h3>
+                <p class="text-sm text-gray-600 mb-4">View unpaid invoices by retailer and aging</p>
+                <a href="{{ url_for('accounts_receivable_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Sales Summary -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i data-feather="trending-up" class="h-6 w-6 text-green-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Sales</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Sales Summary</h3>
+                <p class="text-sm text-gray-600 mb-4">Monthly and yearly sales performance</p>
+                <a href="{{ url_for('sales_summary_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Retailer Performance -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-purple-100">
+                        <i data-feather="users" class="h-6 w-6 text-purple-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Retailers</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Retailer Performance</h3>
+                <p class="text-sm text-gray-600 mb-4">Jobs and revenue by retailer partner</p>
+                <a href="{{ url_for('retailer_performance_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- GST Summary -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-orange-100">
+                        <i data-feather="percent" class="h-6 w-6 text-orange-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Tax</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">GST Summary</h3>
+                <p class="text-sm text-gray-600 mb-4">GST collected and payable summary</p>
+                <a href="{{ url_for('gst_summary_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Job Analysis -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-red-100">
+                        <i data-feather="map-pin" class="h-6 w-6 text-red-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Jobs</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Job Analysis</h3>
+                <p class="text-sm text-gray-600 mb-4">Jobs by location and completion trends</p>
+                <a href="{{ url_for('job_analysis_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+
+        <!-- Inventory Valuation -->
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 rounded-full bg-indigo-100">
+                        <i data-feather="package" class="h-6 w-6 text-indigo-600"></i>
+                    </div>
+                    <span class="text-sm text-gray-500">Inventory</span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Inventory Valuation</h3>
+                <p class="text-sm text-gray-600 mb-4">Stock levels and inventory value</p>
+                <a href="{{ url_for('inventory_valuation_report') }}" class="btn-primary w-full text-center">
+                    View Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Dashboard -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Quick Business Overview</h2>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-blue-600">${{ "%.2f"|format(total_outstanding) }}</p>
+                    <p class="text-sm text-gray-500">Outstanding</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-green-600">${{ "%.2f"|format(monthly_revenue) }}</p>
+                    <p class="text-sm text-gray-500">This Month</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-purple-600">{{ active_retailers }}</p>
+                    <p class="text-sm text-gray-500">Active Retailers</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-3xl font-bold text-orange-600">{{ jobs_this_month }}</p>
+                    <p class="text-sm text-gray-500">Jobs This Month</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    feather.replace();
+</script>
+{% endblock %}
