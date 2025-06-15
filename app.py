@@ -410,6 +410,21 @@ Carpet Invoices Team"""
 
     return redirect(mailto_link)
 
+@app.route('/invoice/<int:invoice_id>/delete', methods=['POST'])
+@login_required
+def delete_invoice(invoice_id):
+    """Delete invoice and associated files"""
+    invoice = db.session.get(Invoice, invoice_id)
+    if not invoice:
+        flash('Invoice not found!', 'error')
+        return redirect(url_for('invoices'))
+
+    invoice_code = invoice.invoice_code
+    db.session.delete(invoice)
+    db.session.commit()
+    flash(f'Invoice {invoice_code} deleted successfully!', 'success')
+    return redirect(url_for('invoices'))
+
 @app.route('/api/invoice/<int:invoice_id>/calculate', methods=['POST'])
 @login_required
 def calculate_invoice(invoice_id):
