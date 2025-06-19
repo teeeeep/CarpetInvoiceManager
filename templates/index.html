@@ -76,7 +76,17 @@
 <div class="bg-white rounded-lg shadow mb-8">
     <div class="p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <a href="{{ url_for('jobs') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200 border-l-4 border-l-red-500">
+                <div class="flex-shrink-0">
+                    <i data-feather="file-plus" class="h-6 w-6 text-red-600"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Create Invoice</p>
+                    <p class="text-xs text-gray-500">Invoice a completed job</p>
+                </div>
+            </a>
+            
             <a href="{{ url_for('add_retailer') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
                 <div class="flex-shrink-0">
                     <i data-feather="plus-circle" class="h-6 w-6 text-blue-600"></i>
