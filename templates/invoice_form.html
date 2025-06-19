@@ -141,6 +141,20 @@
 
 {% block extra_scripts %}
 <script>
+    // Store inventory data for dynamic line creation
+    const inventoryItems = [
+        {% for item in inventory_items %}
+        {
+            id: {{ item.id }},
+            name: "{{ item.name }}",
+            description: "{{ item.description or '' }}",
+            price: {{ item.charge_price }},
+            unit: "{{ item.unit }}",
+            display: "{{ item.name }} ({{ item.charge_price | nz_currency }}/{{ item.unit }})"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
     document.addEventListener('DOMContentLoaded', function() {
         let lineCounter = 1;
         
@@ -158,13 +172,28 @@
         function createInvoiceLine() {
             const div = document.createElement('div');
             div.className = 'invoice-line p-4 border border-gray-200 rounded-lg';
+            
+            // Create inventory dropdown options
+            let inventoryOptions = '<option value="">Select from inventory (optional)</option>';
+            inventoryItems.forEach(item => {
+                inventoryOptions += `<option value="${item.id}" 
+                    data-description="${item.name} - ${item.description}"
+                    data-price="${item.price}"
+                    data-unit="${item.unit}">
+                    ${item.display}
+                </option>`;
+            });
+            
             div.innerHTML = `
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
                     <div class="lg:col-span-5">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <select class="form-select touch-input mb-2 inventory-select" onchange="populateFromInventory(this)">
+                            ${inventoryOptions}
+                        </select>
                         <textarea name="description[]" rows="2" 
-                                 class="form-textarea touch-input" 
-                                 placeholder="e.g., Carpet installation - living room"></textarea>
+                                 class="form-textarea touch-input description-field" 
+                                 placeholder="e.g., Carpet installation - living room" required></textarea>
                     </div>
                     <div class="lg:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Unit Price (NZD)</label>
