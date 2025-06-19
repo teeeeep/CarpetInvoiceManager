@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
-from weasyprint import HTML
 import re
 import tempfile
 
@@ -353,6 +352,9 @@ def invoice_pdf(invoice_id):
         return redirect(url_for('invoices'))
 
     try:
+        # Import WeasyPrint only when needed
+        from weasyprint import HTML
+        
         # Render HTML for PDF
         html_content = render_template('invoice_pdf.html', invoice=invoice)
 
@@ -376,6 +378,10 @@ def invoice_pdf(invoice_id):
 
         return response
 
+    except ImportError as e:
+        app.logger.error(f"WeasyPrint not available: {str(e)}")
+        flash('PDF generation is not available. Please contact system administrator.', 'error')
+        return redirect(url_for('invoice_preview', invoice_id=invoice_id))
     except Exception as e:
         app.logger.error(f"PDF generation error: {str(e)}")
         flash(f'Error generating PDF: {str(e)}', 'error')
