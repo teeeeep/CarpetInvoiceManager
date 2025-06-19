@@ -155,6 +155,28 @@
                 <h2 style="margin: 0; color: #0891b2;">Accounts Receivable Report</h2>
                 <p style="margin: 5px 0;">Outstanding Invoices by Retailer and Aging</p>
                 <p style="margin: 5px 0; font-weight: bold;">Report Date: {{ report_date.strftime('%d/%m/%Y') }}</p>
+                {% if filters.retailer_name or filters.date_from or filters.date_to or filters.aging %}
+                <div style="margin: 10px 0; padding: 10px; background-color: #f3f4f6; border-radius: 5px;">
+                    <p style="margin: 0; font-weight: bold; font-size: 10pt;">Applied Filters:</p>
+                    {% if filters.retailer_name %}
+                    <p style="margin: 2px 0; font-size: 9pt;">• Retailer: {{ filters.retailer_name }}</p>
+                    {% endif %}
+                    {% if filters.date_from %}
+                    <p style="margin: 2px 0; font-size: 9pt;">• Date From: {{ filters.date_from }}</p>
+                    {% endif %}
+                    {% if filters.date_to %}
+                    <p style="margin: 2px 0; font-size: 9pt;">• Date To: {{ filters.date_to }}</p>
+                    {% endif %}
+                    {% if filters.aging %}
+                    <p style="margin: 2px 0; font-size: 9pt;">• Aging: 
+                        {% if filters.aging == 'current' %}Current (0-30 days)
+                        {% elif filters.aging == '31-60' %}31-60 days
+                        {% elif filters.aging == '60-plus' %}60+ days
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </div>
 

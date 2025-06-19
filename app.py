@@ -717,13 +717,50 @@ def accounts_receivable_report():
     
     current_date = datetime.now().date()
     
-    # Get all outstanding invoices
-    outstanding_invoices = db.session.query(Invoice)\
+    # Get filter parameters
+    retailer_filter = request.args.get('retailer_id', type=int)
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    aging_filter = request.args.get('aging')
+    
+    # Build query
+    query = db.session.query(Invoice)\
         .join(Job)\
         .join(Retailer)\
-        .filter(Invoice.status.in_(['draft', 'sent']))\
-        .order_by(Retailer.name, Invoice.date_created)\
-        .all()
+        .filter(Invoice.status.in_(['draft', 'sent']))
+    
+    # Apply filters
+    if retailer_filter:
+        query = query.filter(Job.retailer_id == retailer_filter)
+    
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created >= date_from_obj)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created <= date_to_obj)
+        except ValueError:
+            pass
+    
+    outstanding_invoices = query.order_by(Retailer.name, Invoice.date_created).all()
+    
+    # Apply aging filter after query
+    if aging_filter:
+        filtered_invoices = []
+        for invoice in outstanding_invoices:
+            days_outstanding = (current_date - invoice.date_created).days
+            if aging_filter == 'current' and days_outstanding <= 30:
+                filtered_invoices.append(invoice)
+            elif aging_filter == '31-60' and 31 <= days_outstanding <= 60:
+                filtered_invoices.append(invoice)
+            elif aging_filter == '60-plus' and days_outstanding > 60:
+                filtered_invoices.append(invoice)
+        outstanding_invoices = filtered_invoices
     
     # Group by retailer
     retailer_data = {}
@@ -752,10 +789,20 @@ def accounts_receivable_report():
         else:
             summary['days_60_plus'] += invoice.total
     
+    # Get all retailers for filter dropdown
+    all_retailers = db.session.query(Retailer).order_by(Retailer.name).all()
+    
     return render_template('accounts_receivable_report.html',
                          retailer_data=retailer_data,
                          summary=summary,
-                         report_date=current_date)
+                         report_date=current_date,
+                         all_retailers=all_retailers,
+                         filters={
+                             'retailer_id': retailer_filter,
+                             'date_from': date_from,
+                             'date_to': date_to,
+                             'aging': aging_filter
+                         })
 
 @app.route('/reports/accounts-receivable/pdf')
 @login_required
@@ -765,13 +812,50 @@ def accounts_receivable_report_pdf():
     
     current_date = datetime.now().date()
     
-    # Get all outstanding invoices (same logic as the regular report)
-    outstanding_invoices = db.session.query(Invoice)\
+    # Get filter parameters (same as regular report)
+    retailer_filter = request.args.get('retailer_id', type=int)
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    aging_filter = request.args.get('aging')
+    
+    # Build query (same logic as regular report)
+    query = db.session.query(Invoice)\
         .join(Job)\
         .join(Retailer)\
-        .filter(Invoice.status.in_(['draft', 'sent']))\
-        .order_by(Retailer.name, Invoice.date_created)\
-        .all()
+        .filter(Invoice.status.in_(['draft', 'sent']))
+    
+    # Apply filters
+    if retailer_filter:
+        query = query.filter(Job.retailer_id == retailer_filter)
+    
+    if date_from:
+        try:
+            date_from_obj = datetime.strptime(date_from, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created >= date_from_obj)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            date_to_obj = datetime.strptime(date_to, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created <= date_to_obj)
+        except ValueError:
+            pass
+    
+    outstanding_invoices = query.order_by(Retailer.name, Invoice.date_created).all()
+    
+    # Apply aging filter after query
+    if aging_filter:
+        filtered_invoices = []
+        for invoice in outstanding_invoices:
+            days_outstanding = (current_date - invoice.date_created).days
+            if aging_filter == 'current' and days_outstanding <= 30:
+                filtered_invoices.append(invoice)
+            elif aging_filter == '31-60' and 31 <= days_outstanding <= 60:
+                filtered_invoices.append(invoice)
+            elif aging_filter == '60-plus' and days_outstanding > 60:
+                filtered_invoices.append(invoice)
+        outstanding_invoices = filtered_invoices
     
     # Group by retailer
     retailer_data = {}
@@ -801,11 +885,24 @@ def accounts_receivable_report_pdf():
             summary['days_60_plus'] += invoice.total
     
     try:
+        # Get retailer name for filter display
+        selected_retailer_name = None
+        if retailer_filter:
+            selected_retailer = db.session.get(Retailer, retailer_filter)
+            if selected_retailer:
+                selected_retailer_name = selected_retailer.name
+        
         # Render HTML for PDF
         html_content = render_template('accounts_receivable_report_pdf.html',
                                      retailer_data=retailer_data,
                                      summary=summary,
-                                     report_date=current_date)
+                                     report_date=current_date,
+                                     filters={
+                                         'retailer_name': selected_retailer_name,
+                                         'date_from': date_from,
+                                         'date_to': date_to,
+                                         'aging': aging_filter
+                                     })
         
         # Generate PDF
         pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
