@@ -155,6 +155,32 @@
         {% endfor %}
     ];
 
+    // Calculate line totals and invoice totals (global function)
+    function calculateTotals() {
+        let subtotal = 0;
+        
+        document.querySelectorAll('.invoice-line').forEach(line => {
+            const unitPrice = parseFloat(line.querySelector('.unit-price').value) || 0;
+            const quantity = parseInt(line.querySelector('.quantity').value) || 0;
+            const lineTotal = unitPrice * quantity;
+            
+            line.querySelector('.line-total').textContent = formatCurrency(lineTotal);
+            subtotal += lineTotal;
+        });
+        
+        const gstAmount = subtotal * 0.15;
+        const total = subtotal + gstAmount;
+        
+        document.getElementById('subtotal').textContent = formatCurrency(subtotal) + ' NZD';
+        document.getElementById('gst-amount').textContent = formatCurrency(gstAmount) + ' NZD';
+        document.getElementById('total').textContent = formatCurrency(total) + ' NZD';
+    }
+    
+    // Format currency (global function)
+    function formatCurrency(amount) {
+        return '$' + amount.toFixed(2);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         let lineCounter = 1;
         
@@ -244,31 +270,7 @@
             });
         }
         
-        // Calculate line totals and invoice totals
-        function calculateTotals() {
-            let subtotal = 0;
-            
-            document.querySelectorAll('.invoice-line').forEach(line => {
-                const unitPrice = parseFloat(line.querySelector('.unit-price').value) || 0;
-                const quantity = parseInt(line.querySelector('.quantity').value) || 0;
-                const lineTotal = unitPrice * quantity;
-                
-                line.querySelector('.line-total').textContent = formatCurrency(lineTotal);
-                subtotal += lineTotal;
-            });
-            
-            const gstAmount = subtotal * 0.15;
-            const total = subtotal + gstAmount;
-            
-            document.getElementById('subtotal').textContent = formatCurrency(subtotal) + ' NZD';
-            document.getElementById('gst-amount').textContent = formatCurrency(gstAmount) + ' NZD';
-            document.getElementById('total').textContent = formatCurrency(total) + ' NZD';
-        }
         
-        // Format currency
-        function formatCurrency(amount) {
-            return '$' + amount.toFixed(2);
-        }
         
         // Add event listeners to initial line
         document.querySelector('.unit-price').addEventListener('input', calculateTotals);
@@ -276,7 +278,7 @@
         
         // Initialize
         updateRemoveButtons();
-        calculateTotals();
+        calculateTotals(); // This will calculate the initial line with quantity = 1
         feather.replace();
     });
     
