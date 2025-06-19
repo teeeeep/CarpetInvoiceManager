@@ -891,6 +891,9 @@ def accounts_receivable_report_pdf():
             summary['days_60_plus'] += invoice.total
     
     try:
+        # Import WeasyPrint only when needed
+        from weasyprint import HTML
+        
         # Get retailer name for filter display
         selected_retailer_name = None
         if retailer_filter:
@@ -921,6 +924,10 @@ def accounts_receivable_report_pdf():
         
         return response
         
+    except ImportError as e:
+        app.logger.error(f"WeasyPrint not available: {str(e)}")
+        flash('PDF generation is not available. Please contact system administrator.', 'error')
+        return redirect(url_for('accounts_receivable_report'))
     except Exception as e:
         app.logger.error(f"PDF generation error: {str(e)}")
         flash(f'Error generating PDF: {str(e)}', 'error')
