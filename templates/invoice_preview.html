@@ -20,13 +20,74 @@
                 <i data-feather="printer" class="inline h-4 w-4 mr-2"></i>
                 Print
             </button>
-            <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id) }}" class="btn-primary">
-                <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
-                Download PDF
-            </a>
             <a href="{{ url_for('invoice_email', invoice_id=invoice.id) }}" class="btn-primary">
                 <i data-feather="mail" class="inline h-4 w-4 mr-2"></i>
                 Send Email
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- PDF Style Selection -->
+<div class="no-print mb-6">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Download PDF</h2>
+        <p class="text-gray-600 mb-4">Choose your preferred PDF style:</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Style 1 - Professional Blue -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Professional Blue</h3>
+                    <div class="w-6 h-6 bg-blue-600 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Clean, corporate style with blue accents. Best for formal business documents.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style1') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+            
+            <!-- Style 2 - Colorful Fun -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-yellow-500 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Colorful Fun</h3>
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-6 bg-yellow-400 rounded"></div>
+                        <div class="w-2 h-6 bg-green-400 rounded"></div>
+                        <div class="w-2 h-6 bg-blue-400 rounded"></div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Bright, friendly style with Comic Sans font. Perfect for a more casual, approachable look.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style2') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+            
+            <!-- Style 3 - Minimalist -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-800 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Minimalist</h3>
+                    <div class="w-6 h-6 bg-gray-800 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Ultra-clean black and white design. Modern, sophisticated aesthetic.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style3') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Download with Default Style -->
+        <div class="border-t pt-4">
+            <p class="text-sm text-gray-500 mb-2">Or download with default style:</p>
+            <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id) }}" class="btn-primary">
+                <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                Quick Download (Professional Blue)
             </a>
         </div>
     </div>

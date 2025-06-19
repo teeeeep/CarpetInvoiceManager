@@ -345,24 +345,35 @@ def invoice_preview(invoice_id):
 @app.route('/invoice/<int:invoice_id>/pdf')
 @login_required
 def invoice_pdf(invoice_id):
-    """Generate and download PDF invoice"""
+    """Generate and download PDF invoice with style selection"""
     invoice = db.session.get(Invoice, invoice_id)
     if not invoice:
         flash('Invoice not found!', 'error')
         return redirect(url_for('invoices'))
 
+    # Get style parameter (default to style1 if not specified)
+    style = request.args.get('style', 'style1')
+    
+    # Validate style parameter
+    valid_styles = ['style1', 'style2', 'style3']
+    if style not in valid_styles:
+        style = 'style1'
+
     try:
         # Import WeasyPrint only when needed
         from weasyprint import HTML
         
+        # Select the appropriate template based on style
+        template_name = f'invoice_pdf_{style}.html'
+        
         # Render HTML for PDF
-        html_content = render_template('invoice_pdf.html', invoice=invoice)
+        html_content = render_template(template_name, invoice=invoice)
 
         # Generate PDF
         pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
 
         # Save to FileStore
-        filename = f"invoice_{invoice.invoice_code}.pdf"
+        filename = f"invoice_{invoice.invoice_code}_{style}.pdf"
         file_store = FileStore(
             invoice_id=invoice.id,
             file_path=filename,

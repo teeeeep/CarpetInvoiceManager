@@ -45,7 +45,8 @@ Auto-generated invoice codes follow the format: `<ID>-<StreetNoStreet>-<Retailer
 - **Background Sync**: Queues operations when offline for later synchronization
 
 ### PDF Generation
-- **WeasyPrint Integration**: Professional A4 invoice generation
+- **WeasyPrint Integration**: Professional A4 invoice generation with multiple style options
+- **Style Selection**: Three distinct PDF styles (Professional Blue, Colorful Fun, Minimalist)
 - **Email Integration**: mailto links for sending invoices via default mail client
 - **Print Support**: Browser-based printing with CSS print styles
 
@@ -105,6 +106,7 @@ Comprehensive environment variables for:
 
 - June 14, 2025. Initial setup
 - June 14, 2025. Added simplified inventory system with CSV import and invoice integration
+- June 19, 2025. Added PDF style selection with three distinct templates (Professional Blue, Colorful Fun, Minimalist)
 
 ## User Preferences
 

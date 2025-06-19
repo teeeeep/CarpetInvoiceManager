@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_code }}{% endblock %}
+
+{% block content %}
+<style>
+    @page {
+        size: A4;
+        margin: 2cm;
+        @top-center {
+            content: "Invoice {{ invoice.invoice_code }}";
+            font-size: 10pt;
+            color: #666;
+        }
+        @bottom-center {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 10pt;
+            color: #666;
+        }
+    }
+
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.5;
+        color: #000;
+        background-color: #fff;
+    }
+
+    .invoice-header {
+        padding-bottom: 30px;
+        margin-bottom: 40px;
+        border-bottom: 1px solid #000;
+    }
+
+    .invoice-header h1 {
+        font-size: 28pt;
+        color: #000;
+        margin: 0;
+        font-weight: 300;
+        letter-spacing: 2px;
+    }
+
+    .company-info {
+        text-align: right;
+        margin-bottom: 20px;
+    }
+
+    .invoice-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+    }
+
+    .bill-to, .invoice-info {
+        width: 45%;
+    }
+
+    .section-title {
+        font-size: 14pt;
+        font-weight: 300;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+
+    .invoice-table th,
+    .invoice-table td {
+        padding: 15px 10px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .invoice-table th {
+        background-color: #000;
+        color: #fff;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 10pt;
+    }
+
+    .invoice-table .text-right {
+        text-align: right;
+    }
+
+    .totals-section {
+        float: right;
+        width: 300px;
+        margin-top: 20px;
+    }
+
+    .totals-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .totals-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .totals-table .total-row {
+        font-weight: bold;
+        border-top: 2px solid #000;
+        border-bottom: 2px solid #000;
+        font-size: 14pt;
+    }
+
+    .footer {
+        margin-top: 60px;
+        padding-top: 20px;
+        border-top: 1px solid #e0e0e0;
+        font-size: 9pt;
+        color: #666;
+        clear: both;
+    }
+
+    .payment-terms {
+        margin-top: 40px;
+        padding: 20px 0;
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+</style>
+
+<div class="invoice-container">
+    <!-- Company Header -->
+    <div class="invoice-header">
+        <div class="company-info">
+            <h1>CARPET INVOICES</h1>
+            <p style="margin: 5px 0; font-weight: 300;">Professional Carpet Installation Services</p>
+            <p style="margin: 5px 0;">New Zealand</p>
+            <p style="margin: 5px 0;">info@carpetinvoices.co.nz</p>
+            <p style="margin: 5px 0;">0800-CARPET</p>
+        </div>
+    </div>
+
+    <!-- Invoice Details -->
+    <div class="invoice-details">
+        <div class="bill-to">
+            <h3 class="section-title">Bill To</h3>
+            <p><strong>{{ invoice.job.retailer.name }}</strong></p>
+            <p>{{ invoice.job.retailer.email }}</p>
+            <p>{{ invoice.job.retailer.phone }}</p>
+            <br>
+            <p><strong>Installation Address</strong></p>
+            <p>{{ invoice.job.street_address }}</p>
+            <p>{{ invoice.job.suburb }}, {{ invoice.job.town_city }}</p>
+            <p><strong>Homeowner:</strong> {{ invoice.job.homeowner_name }}</p>
+        </div>
+
+        <div class="invoice-info">
+            <h3 class="section-title">Invoice Details</h3>
+            <table style="width: 100%;">
+                <tr>
+                    <td><strong>Invoice Number</strong></td>
+                    <td>{{ invoice.invoice_code }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Invoice Date</strong></td>
+                    <td>{{ invoice.date_created|nz_date }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Job Completed</strong></td>
+                    <td>{{ invoice.job.date_completed|nz_date }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Status</strong></td>
+                    <td style="text-transform: capitalize;">{{ invoice.status }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Invoice Items -->
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Unit Price</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in invoice.lines %}
+            <tr>
+                <td>{{ line.description }}</td>
+                <td class="text-right">{{ line.quantity }}</td>
+                <td class="text-right">{{ line.unit_price|nz_currency }}</td>
+                <td class="text-right">{{ line.line_total|nz_currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal</td>
+                <td class="text-right">{{ invoice.subtotal|nz_currency }}</td>
+            </tr>
+            <tr>
+                <td>GST ({{ invoice.gst_percentage }}%)</td>
+                <td class="text-right">{{ invoice.gst_amount|nz_currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td><strong>TOTAL</strong></td>
+                <td class="text-right"><strong>{{ invoice.total|nz_currency }}</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Payment Terms -->
+    <div class="payment-terms">
+        <h4 style="margin-top: 0; font-weight: 300; text-transform: uppercase; letter-spacing: 1px;">Payment Terms</h4>
+        <p style="margin: 5px 0;">Payment is due within 30 days of invoice date.</p>
+        <p style="margin: 5px 0;">Please reference invoice number {{ invoice.invoice_code }} when making payment.</p>
+        <p style="margin: 5px 0;">Bank transfer details available upon request.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Thank you for choosing our carpet installation services.</p>
+        <p>This invoice was generated on {{ invoice.date_created|nz_date }} NZT</p>
+    </div>
+</div>
+{% endblock %}
