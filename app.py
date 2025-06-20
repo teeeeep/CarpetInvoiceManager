@@ -124,6 +124,20 @@ def index():
                          low_stock_items=low_stock_items,
                          total_inventory_value=total_inventory_value)
 
+@app.route('/simple-home')
+@login_required
+def simple_home():
+    """Simplified homepage designed for older users"""
+    # Get recent invoices (limit to 5 for simplicity)
+    recent_invoices = db.session.query(Invoice).join(Job).join(Retailer).order_by(Invoice.date_created.desc()).limit(5).all()
+    
+    # Get jobs that don't have invoices yet for easy invoice creation
+    jobs_without_invoices = db.session.query(Job).outerjoin(Invoice).filter(Invoice.id == None).order_by(Job.date_completed.desc()).limit(5).all()
+    
+    return render_template('simple_home.html', 
+                         recent_invoices=recent_invoices,
+                         jobs_without_invoices=jobs_without_invoices)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Admin login"""

@@ -117,6 +117,9 @@
                             <a href="{{ url_for('index') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                                 Dashboard
                             </a>
+                            <a href="{{ url_for('simple_home') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                                Simple Home
+                            </a>
                             <a href="{{ url_for('retailers') }}" class="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                                 Retailers
                             </a>
@@ -154,6 +157,7 @@
         <div class="mobile-menu hidden md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="{{ url_for('index') }}" class="hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">Dashboard</a>
+                <a href="{{ url_for('simple_home') }}" class="hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">Simple Home</a>
                 <a href="{{ url_for('retailers') }}" class="hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">Retailers</a>
                 <a href="{{ url_for('jobs') }}" class="hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">Jobs</a>
                 <a href="{{ url_for('invoices') }}" class="hover:bg-gray-700 block px-3 py-2 rounded-md text-base font-medium">Invoices</a>
