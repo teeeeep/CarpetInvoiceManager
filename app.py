@@ -211,8 +211,8 @@ def add_job():
         )
         db.session.add(job)
         db.session.commit()
-        flash('Job added successfully!', 'success')
-        return redirect(url_for('jobs'))
+        flash('Job added successfully! Now create an invoice for this job.', 'success')
+        return redirect(url_for('add_invoice', job_id=job.id))
 
     retailers = db.session.query(Retailer).all()
     return render_template('job_form.html', retailers=retailers)
