@@ -1224,6 +1224,12 @@ def inventory_valuation_report():
                          low_stock_items=low_stock_items,
                          total_value=total_value)
 
+@app.route('/admin')
+@login_required
+def admin_panel():
+    """Admin control panel for database management"""
+    return render_template('admin_panel.html')
+
 @app.route('/admin/cleanse-database', methods=['POST'])
 @login_required
 def cleanse_database():
@@ -1244,7 +1250,7 @@ def cleanse_database():
         db.session.rollback()
         flash(f'Error cleansing database: {str(e)}', 'error')
     
-    return redirect(url_for('index'))
+    return redirect(url_for('admin_panel'))
 
 @app.route('/admin/reset-database', methods=['POST'])
 @login_required
@@ -1274,7 +1280,7 @@ def reset_database():
         db.session.rollback()
         flash(f'Error resetting database: {str(e)}', 'error')
     
-    return redirect(url_for('index'))
+    return redirect(url_for('admin_panel'))
 
 # Create tables
 with app.app_context():

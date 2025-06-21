@@ -1,0 +1,133 @@
+
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Carpet Invoices{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Admin Control Panel</h1>
+        <p class="mt-2 text-gray-600">Manage database and system settings</p>
+    </div>
+
+    <!-- Database Management -->
+    <div class="bg-white rounded-lg shadow mb-8">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <i data-feather="database" class="h-6 w-6 mr-2 text-red-600"></i>
+                Database Management
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cleanse Database -->
+                <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+                    <h3 class="text-lg font-medium text-red-900 mb-2">
+                        <i data-feather="trash-2" class="inline h-5 w-5 mr-1"></i>
+                        Cleanse Database
+                    </h3>
+                    <p class="text-sm text-red-700 mb-4">
+                        Remove all data from the database while keeping table structure. 
+                        <strong>This action cannot be undone!</strong>
+                    </p>
+                    <form method="POST" action="{{ url_for('cleanse_database') }}" onsubmit="return confirm('Are you absolutely sure you want to delete ALL data? This cannot be undone!')">
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            <i data-feather="alert-triangle" class="inline h-4 w-4 mr-2"></i>
+                            Cleanse All Data
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Reset with Sample Data -->
+                <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                    <h3 class="text-lg font-medium text-blue-900 mb-2">
+                        <i data-feather="refresh-cw" class="inline h-5 w-5 mr-1"></i>
+                        Reset with Sample Data
+                    </h3>
+                    <p class="text-sm text-blue-700 mb-4">
+                        Clear all data and restore with sample retailer for testing.
+                        Useful for development and testing.
+                    </p>
+                    <form method="POST" action="{{ url_for('reset_database') }}" onsubmit="return confirm('This will delete all data and add sample data. Continue?')">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                            <i data-feather="rotate-ccw" class="inline h-4 w-4 mr-2"></i>
+                            Reset with Sample Data
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Database Stats -->
+            <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                <h4 class="text-md font-medium text-gray-900 mb-3">Current Database Status</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <p class="text-2xl font-bold text-blue-600">{{ total_retailers or 0 }}</p>
+                        <p class="text-sm text-gray-600">Retailers</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-green-600">{{ total_jobs or 0 }}</p>
+                        <p class="text-sm text-gray-600">Jobs</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-purple-600">{{ total_invoices or 0 }}</p>
+                        <p class="text-sm text-gray-600">Invoices</p>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-orange-600">{{ total_inventory_items or 0 }}</p>
+                        <p class="text-sm text-gray-600">Inventory Items</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <i data-feather="zap" class="h-6 w-6 mr-2 text-blue-600"></i>
+                Quick Actions
+            </h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{{ url_for('index') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                    <div class="flex-shrink-0">
+                        <i data-feather="home" class="h-6 w-6 text-blue-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Back to Dashboard</p>
+                        <p class="text-xs text-gray-500">Return to main application</p>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('reports') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                    <div class="flex-shrink-0">
+                        <i data-feather="bar-chart-2" class="h-6 w-6 text-green-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">View Reports</p>
+                        <p class="text-xs text-gray-500">Business analytics</p>
+                    </div>
+                </a>
+                
+                <a href="{{ url_for('inventory') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                    <div class="flex-shrink-0">
+                        <i data-feather="package" class="h-6 w-6 text-purple-600"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">Manage Inventory</p>
+                        <p class="text-xs text-gray-500">Stock control</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    feather.replace();
+</script>
+{% endblock %}
