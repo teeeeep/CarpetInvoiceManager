@@ -1224,6 +1224,58 @@ def inventory_valuation_report():
                          low_stock_items=low_stock_items,
                          total_value=total_value)
 
+@app.route('/admin/cleanse-database', methods=['POST'])
+@login_required
+def cleanse_database():
+    """Cleanse all data from the database (keep tables structure)"""
+    try:
+        # Delete all records in order to respect foreign key constraints
+        db.session.query(StockMovement).delete()
+        db.session.query(InventoryItem).delete()
+        db.session.query(FileStore).delete()
+        db.session.query(InvoiceLine).delete()
+        db.session.query(Invoice).delete()
+        db.session.query(Job).delete()
+        db.session.query(Retailer).delete()
+        
+        db.session.commit()
+        flash('Database cleansed successfully! All data has been removed.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error cleansing database: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
+
+@app.route('/admin/reset-database', methods=['POST'])
+@login_required
+def reset_database():
+    """Reset database with sample data"""
+    try:
+        # First cleanse all data
+        db.session.query(StockMovement).delete()
+        db.session.query(InventoryItem).delete()
+        db.session.query(FileStore).delete()
+        db.session.query(InvoiceLine).delete()
+        db.session.query(Invoice).delete()
+        db.session.query(Job).delete()
+        db.session.query(Retailer).delete()
+        
+        # Add sample data
+        sample_retailer = Retailer(
+            name="Carpet Plus",
+            email="admin@carpetplus.co.nz",
+            phone="09-123-4567"
+        )
+        db.session.add(sample_retailer)
+        db.session.commit()
+        
+        flash('Database reset successfully! Sample data has been restored.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error resetting database: {str(e)}', 'error')
+    
+    return redirect(url_for('index'))
+
 # Create tables
 with app.app_context():
     db.create_all()
