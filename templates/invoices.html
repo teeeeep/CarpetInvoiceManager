@@ -93,13 +93,96 @@
     </div>
 </div>
 
+<!-- Search and Filters -->
+<div class="bg-white rounded-lg shadow mb-6">
+    <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Search & Filter Invoices</h2>
+        
+        <form method="GET" action="{{ url_for('invoices') }}" class="space-y-4">
+            <!-- Search Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" id="search" name="search" value="{{ search }}" 
+                           placeholder="Invoice code, address, homeowner, retailer..."
+                           class="form-input">
+                </div>
+                
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+                        <option value="sent" {% if status_filter == 'sent' %}selected{% endif %}>Sent</option>
+                        <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                    <input type="date" id="date_from" name="date_from" value="{{ date_from }}" class="form-input">
+                </div>
+                
+                <div>
+                    <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                    <input type="date" id="date_to" name="date_to" value="{{ date_to }}" class="form-input">
+                </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sort" name="sort" class="form-select">
+                        <option value="date_created" {% if sort_by == 'date_created' %}selected{% endif %}>Date Created</option>
+                        <option value="invoice_code" {% if sort_by == 'invoice_code' %}selected{% endif %}>Invoice Code</option>
+                        <option value="total" {% if sort_by == 'total' %}selected{% endif %}>Amount</option>
+                        <option value="status" {% if sort_by == 'status' %}selected{% endif %}>Status</option>
+                        <option value="address" {% if sort_by == 'address' %}selected{% endif %}>Address</option>
+                        <option value="homeowner" {% if sort_by == 'homeowner' %}selected{% endif %}>Homeowner</option>
+                        <option value="retailer" {% if sort_by == 'retailer' %}selected{% endif %}>Retailer</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="order" class="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                    <select id="order" name="order" class="form-select">
+                        <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Newest First</option>
+                        <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Oldest First</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-end space-x-2">
+                    <button type="submit" class="btn-primary">
+                        <i data-feather="search" class="inline h-4 w-4 mr-2"></i>
+                        Search
+                    </button>
+                    <a href="{{ url_for('invoices') }}" class="btn-secondary">
+                        <i data-feather="refresh-cw" class="inline h-4 w-4 mr-2"></i>
+                        Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Invoices List -->
 <div class="bg-white rounded-lg shadow">
     <div class="p-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">All Invoices</h2>
+            <h2 class="text-lg font-semibold text-gray-900">
+                {% if search or status_filter or date_from or date_to %}
+                    Filtered Invoices ({{ invoices|length }} results)
+                {% else %}
+                    All Invoices ({{ invoices|length }})
+                {% endif %}
+            </h2>
             <div class="flex space-x-2">
-                <!-- Filter buttons could go here -->
+                <span class="text-sm text-gray-500">
+                    Sorted by {{ sort_by.replace('_', ' ').title() }} 
+                    ({{ 'Newest First' if sort_order == 'desc' else 'Oldest First' }})
+                </span>
             </div>
         </div>
         

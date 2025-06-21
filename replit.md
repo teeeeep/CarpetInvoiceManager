@@ -108,6 +108,7 @@ Comprehensive environment variables for:
 - June 14, 2025. Added simplified inventory system with CSV import and invoice integration
 - June 19, 2025. Added PDF style selection with three distinct templates (Professional Blue, Colorful Fun, Minimalist)
 - June 20, 2025. Added simplified homepage (/simple-home) designed for older users with large buttons and plain English
+- June 21, 2025. Enhanced file naming structure and improved invoice search functionality with filtering and sorting
 
 ## User Preferences
 

@@ -265,9 +265,82 @@ def delete_job(job_id):
 @app.route('/invoices')
 @login_required
 def invoices():
-    """List all invoices"""
-    invoices_list = db.session.query(Invoice).join(Job).join(Retailer).all()
-    return render_template('invoices.html', invoices=invoices_list)
+    """List all invoices with search and filtering"""
+    # Get filter parameters
+    search = request.args.get('search', '').strip()
+    status_filter = request.args.get('status', '')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+    sort_by = request.args.get('sort', 'date_created')
+    sort_order = request.args.get('order', 'desc')
+    
+    # Base query with joins for search
+    query = db.session.query(Invoice).join(Job).join(Retailer)
+    
+    # Apply search filter
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            db.or_(
+                Invoice.invoice_code.ilike(search_term),
+                Job.street_address.ilike(search_term),
+                Job.suburb.ilike(search_term),
+                Job.town_city.ilike(search_term),
+                Job.homeowner_name.ilike(search_term),
+                Retailer.name.ilike(search_term)
+            )
+        )
+    
+    # Apply status filter
+    if status_filter:
+        query = query.filter(Invoice.status == status_filter)
+    
+    # Apply date range filter
+    if date_from:
+        try:
+            from_date = datetime.strptime(date_from, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created >= from_date)
+        except ValueError:
+            pass
+    
+    if date_to:
+        try:
+            to_date = datetime.strptime(date_to, '%Y-%m-%d').date()
+            query = query.filter(Invoice.date_created <= to_date)
+        except ValueError:
+            pass
+    
+    # Apply sorting
+    if sort_by == 'invoice_code':
+        sort_column = Invoice.invoice_code
+    elif sort_by == 'total':
+        sort_column = Invoice.total
+    elif sort_by == 'status':
+        sort_column = Invoice.status
+    elif sort_by == 'address':
+        sort_column = Job.street_address
+    elif sort_by == 'homeowner':
+        sort_column = Job.homeowner_name
+    elif sort_by == 'retailer':
+        sort_column = Retailer.name
+    else:  # default to date_created
+        sort_column = Invoice.date_created
+    
+    if sort_order == 'asc':
+        query = query.order_by(sort_column.asc())
+    else:
+        query = query.order_by(sort_column.desc())
+    
+    invoices_list = query.all()
+    
+    return render_template('invoices.html', 
+                         invoices=invoices_list,
+                         search=search,
+                         status_filter=status_filter,
+                         date_from=date_from,
+                         date_to=date_to,
+                         sort_by=sort_by,
+                         sort_order=sort_order)
 
 @app.route('/invoice/add/<int:job_id>')
 @login_required
@@ -386,8 +459,20 @@ def invoice_pdf(invoice_id):
         # Generate PDF
         pdf = HTML(string=html_content, base_url=request.url_root).write_pdf()
 
-        # Save to FileStore
-        filename = f"invoice_{invoice.invoice_code}_{style}.pdf"
+        # Generate new filename structure: Address (INVOICENUM - Address - Retailer - Year)
+        # Clean address for filename (remove special characters)
+        clean_address = re.sub(r'[^\w\s-]', '', invoice.job.street_address).strip()
+        clean_address = re.sub(r'[-\s]+', '', clean_address)
+        
+        # Clean retailer name
+        clean_retailer = re.sub(r'[^\w\s-]', '', invoice.job.retailer.name).strip()
+        clean_retailer = re.sub(r'[-\s]+', '', clean_retailer)
+        
+        # Get year from invoice date
+        year = invoice.date_created.year
+        
+        # New filename structure: Address (INVOICENUM - Address - Retailer - Year)
+        filename = f"{clean_address} ({invoice.invoice_code} - {clean_address} - {clean_retailer} - {year}).pdf"
         file_store = FileStore(
             invoice_id=invoice.id,
             file_path=filename,

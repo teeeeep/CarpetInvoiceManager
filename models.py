@@ -41,14 +41,14 @@ class Job(db.Model):
 class Invoice(db.Model):
     """Invoice model for carpet installation invoices"""
     id = db.Column(db.Integer, primary_key=True)
-    invoice_code = db.Column(db.String(100), unique=True, nullable=False)
-    job_id = db.Column(db.Integer, ForeignKey('job.id'), nullable=False)
-    date_created = db.Column(db.Date, nullable=False, default=datetime.now().date)
-    status = db.Column(db.String(20), nullable=False, default='draft')  # draft, sent, paid
+    invoice_code = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    job_id = db.Column(db.Integer, ForeignKey('job.id'), nullable=False, index=True)
+    date_created = db.Column(db.Date, nullable=False, default=datetime.now().date, index=True)
+    status = db.Column(db.String(20), nullable=False, default='draft', index=True)  # draft, sent, paid
     gst_percentage = db.Column(db.Float, nullable=False, default=15.0)
     subtotal = db.Column(db.Float, nullable=False, default=0.0)
     gst_amount = db.Column(db.Float, nullable=False, default=0.0)
-    total = db.Column(db.Float, nullable=False, default=0.0)
+    total = db.Column(db.Float, nullable=False, default=0.0, index=True)
     
     # Relationships
     job = relationship("Job", back_populates="invoices")
