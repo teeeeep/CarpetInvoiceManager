@@ -1228,7 +1228,17 @@ def inventory_valuation_report():
 @login_required
 def admin_panel():
     """Admin control panel for database management"""
-    return render_template('admin_panel.html')
+    # Get current database statistics
+    total_retailers = db.session.query(Retailer).count()
+    total_jobs = db.session.query(Job).count()
+    total_invoices = db.session.query(Invoice).count()
+    total_inventory_items = db.session.query(InventoryItem).filter_by(is_active=True).count()
+    
+    return render_template('admin_panel.html',
+                         total_retailers=total_retailers,
+                         total_jobs=total_jobs,
+                         total_invoices=total_invoices,
+                         total_inventory_items=total_inventory_items)
 
 @app.route('/admin/cleanse-database', methods=['POST'])
 @login_required
@@ -1266,16 +1276,168 @@ def reset_database():
         db.session.query(Job).delete()
         db.session.query(Retailer).delete()
         
-        # Add sample data
-        sample_retailer = Retailer(
-            name="Carpet Plus",
-            email="admin@carpetplus.co.nz",
-            phone="09-123-4567"
-        )
-        db.session.add(sample_retailer)
+        # Add sample retailers
+        retailers = [
+            Retailer(name="Carpet Plus", email="admin@carpetplus.co.nz", phone="09-123-4567"),
+            Retailer(name="Auckland Carpet Co", email="info@aucklandcarpet.co.nz", phone="09-987-6543"),
+            Retailer(name="Flooring World", email="sales@flooringworld.co.nz", phone="09-555-0123"),
+            Retailer(name="Premium Carpets Ltd", email="orders@premiumcarpets.co.nz", phone="09-444-5678")
+        ]
+        
+        for retailer in retailers:
+            db.session.add(retailer)
+        db.session.flush()
+        
+        # Add sample inventory items
+        inventory_items = [
+            InventoryItem(name="Premium Wool Carpet", description="High-quality wool carpet for living areas", category="carpet", unit="m²", unit_cost=45.50, charge_price=89.99, current_stock=250.0, minimum_stock=50.0, supplier="Wool Masters NZ", supplier_code="WM-PREM-001"),
+            InventoryItem(name="Standard Nylon Carpet", description="Durable nylon carpet for high traffic areas", category="carpet", unit="m²", unit_cost=28.75, charge_price=54.99, current_stock=180.0, minimum_stock=40.0, supplier="Synthetic Solutions", supplier_code="SS-NYL-STD"),
+            InventoryItem(name="Luxury Berber Carpet", description="Textured berber carpet for modern homes", category="carpet", unit="m²", unit_cost=38.20, charge_price=72.50, current_stock=120.0, minimum_stock=30.0, supplier="Berber Direct", supplier_code="BD-LUX-002"),
+            InventoryItem(name="Premium Underlay", description="High-density underlay for comfort and insulation", category="underlay", unit="m²", unit_cost=12.50, charge_price=24.99, current_stock=300.0, minimum_stock=75.0, supplier="Comfort Base Ltd", supplier_code="CB-PREM-UL"),
+            InventoryItem(name="Standard Underlay", description="Standard density underlay for general use", category="underlay", unit="m²", unit_cost=8.25, charge_price=16.99, current_stock=220.0, minimum_stock=50.0, supplier="Comfort Base Ltd", supplier_code="CB-STD-UL"),
+            InventoryItem(name="Carpet Adhesive", description="Professional grade carpet adhesive", category="adhesive", unit="litres", unit_cost=15.80, charge_price=32.50, current_stock=45.0, minimum_stock=10.0, supplier="Bond Strong", supplier_code="BS-ADH-001"),
+            InventoryItem(name="Tack Strips", description="Wooden tack strips for carpet installation", category="tools", unit="pieces", unit_cost=2.40, charge_price=4.99, current_stock=150.0, minimum_stock=25.0, supplier="Install Pro", supplier_code="IP-TACK-24"),
+            InventoryItem(name="Seaming Tape", description="Heat-activated seaming tape for joins", category="tools", unit="metres", unit_cost=3.20, charge_price=6.50, current_stock=80.0, minimum_stock=20.0, supplier="Join Perfect", supplier_code="JP-SEAM-H20"),
+            InventoryItem(name="Carpet Tucker", description="Professional carpet tucker tool", category="tools", unit="pieces", unit_cost=18.50, charge_price=35.00, current_stock=12.0, minimum_stock=3.0, supplier="Tool Masters", supplier_code="TM-TUCKER-PRO"),
+            InventoryItem(name="Knee Kicker", description="Carpet stretching knee kicker", category="tools", unit="pieces", unit_cost=45.00, charge_price=0.00, current_stock=8.0, minimum_stock=2.0, supplier="Stretch Pro", supplier_code="SP-KNEE-K01")
+        ]
+        
+        for item in inventory_items:
+            db.session.add(item)
+        db.session.flush()
+        
+        # Add sample jobs
+        from datetime import date, timedelta
+        
+        jobs = [
+            Job(street_address="123 Queen Street", suburb="Auckland Central", town_city="Auckland", retailer_id=retailers[0].id, homeowner_name="John Smith", homeowner_phone="021-123-4567", date_completed=date.today() - timedelta(days=5)),
+            Job(street_address="456 Ponsonby Road", suburb="Ponsonby", town_city="Auckland", retailer_id=retailers[0].id, homeowner_name="Sarah Johnson", homeowner_phone="021-987-6543", date_completed=date.today() - timedelta(days=3)),
+            Job(street_address="789 Dominion Road", suburb="Mount Eden", town_city="Auckland", retailer_id=retailers[1].id, homeowner_name="Mike Wilson", homeowner_phone="021-555-0123", date_completed=date.today() - timedelta(days=7)),
+            Job(street_address="321 Remuera Road", suburb="Remuera", town_city="Auckland", retailer_id=retailers[1].id, homeowner_name="Emma Brown", homeowner_phone="021-444-5678", date_completed=date.today() - timedelta(days=2)),
+            Job(street_address="654 Great North Road", suburb="Grey Lynn", town_city="Auckland", retailer_id=retailers[2].id, homeowner_name="David Lee", homeowner_phone="021-333-7890", date_completed=date.today() - timedelta(days=1)),
+            Job(street_address="987 New North Road", suburb="Kingsland", town_city="Auckland", retailer_id=retailers[2].id, homeowner_name="Lisa Chen", homeowner_phone="021-222-9876", date_completed=date.today() - timedelta(days=4)),
+            Job(street_address="147 Manukau Road", suburb="Epsom", town_city="Auckland", retailer_id=retailers[3].id, homeowner_name="Robert Taylor", homeowner_phone="021-111-2345", date_completed=date.today() - timedelta(days=6)),
+            Job(street_address="258 Mt Eden Road", suburb="Mount Eden", town_city="Auckland", retailer_id=retailers[3].id, homeowner_name="Amanda White", homeowner_phone="021-888-3456", date_completed=date.today() - timedelta(days=8))
+        ]
+        
+        for job in jobs:
+            db.session.add(job)
+        db.session.flush()
+        
+        # Add sample invoices with line items
+        invoice_data = [
+            {
+                "job": jobs[0],
+                "status": "paid",
+                "lines": [
+                    {"description": "Premium Wool Carpet - Living Room", "unit_price": 89.99, "quantity": 35},
+                    {"description": "Premium Underlay", "unit_price": 24.99, "quantity": 35},
+                    {"description": "Installation Labour", "unit_price": 25.00, "quantity": 35}
+                ]
+            },
+            {
+                "job": jobs[1],
+                "status": "sent",
+                "lines": [
+                    {"description": "Standard Nylon Carpet - Bedrooms", "unit_price": 54.99, "quantity": 28},
+                    {"description": "Standard Underlay", "unit_price": 16.99, "quantity": 28},
+                    {"description": "Installation Labour", "unit_price": 20.00, "quantity": 28}
+                ]
+            },
+            {
+                "job": jobs[2],
+                "status": "paid",
+                "lines": [
+                    {"description": "Luxury Berber Carpet - Lounge & Dining", "unit_price": 72.50, "quantity": 42},
+                    {"description": "Premium Underlay", "unit_price": 24.99, "quantity": 42},
+                    {"description": "Installation Labour", "unit_price": 30.00, "quantity": 42}
+                ]
+            },
+            {
+                "job": jobs[3],
+                "status": "draft",
+                "lines": [
+                    {"description": "Premium Wool Carpet - Master Bedroom", "unit_price": 89.99, "quantity": 18},
+                    {"description": "Premium Underlay", "unit_price": 24.99, "quantity": 18},
+                    {"description": "Installation Labour", "unit_price": 25.00, "quantity": 18}
+                ]
+            },
+            {
+                "job": jobs[4],
+                "status": "sent",
+                "lines": [
+                    {"description": "Standard Nylon Carpet - Office", "unit_price": 54.99, "quantity": 22},
+                    {"description": "Standard Underlay", "unit_price": 16.99, "quantity": 22},
+                    {"description": "Tack Strips", "unit_price": 4.99, "quantity": 15},
+                    {"description": "Installation Labour", "unit_price": 20.00, "quantity": 22}
+                ]
+            },
+            {
+                "job": jobs[5],
+                "status": "paid",
+                "lines": [
+                    {"description": "Luxury Berber Carpet - Living Areas", "unit_price": 72.50, "quantity": 38},
+                    {"description": "Premium Underlay", "unit_price": 24.99, "quantity": 38},
+                    {"description": "Installation Labour", "unit_price": 30.00, "quantity": 38}
+                ]
+            }
+        ]
+        
+        for inv_data in invoice_data:
+            # Create invoice with temporary code
+            temp_code = f"TEMP-{datetime.now().strftime('%Y%m%d%H%M%S')}-{inv_data['job'].id}"
+            invoice = Invoice(
+                job_id=inv_data['job'].id,
+                date_created=inv_data['job'].date_completed,
+                status=inv_data['status'],
+                gst_percentage=15.0,
+                subtotal=0.0,
+                gst_amount=0.0,
+                total=0.0,
+                invoice_code=temp_code
+            )
+            db.session.add(invoice)
+            db.session.flush()
+            
+            # Generate proper invoice code
+            invoice.invoice_code = generate_invoice_code(
+                invoice.id, inv_data['job'].street_address, inv_data['job'].retailer.name, inv_data['job'].homeowner_name
+            )
+            
+            # Add invoice lines
+            subtotal = 0.0
+            for line_data in inv_data['lines']:
+                line_total = line_data['unit_price'] * line_data['quantity']
+                line = InvoiceLine(
+                    invoice_id=invoice.id,
+                    description=line_data['description'],
+                    unit_price=line_data['unit_price'],
+                    quantity=line_data['quantity'],
+                    line_total=line_total
+                )
+                db.session.add(line)
+                subtotal += line_total
+            
+            # Update invoice totals
+            invoice.subtotal = subtotal
+            invoice.gst_amount = subtotal * (invoice.gst_percentage / 100)
+            invoice.total = subtotal + invoice.gst_amount
+        
+        # Add some stock movements
+        stock_movements = [
+            StockMovement(inventory_item_id=inventory_items[0].id, movement_type="in", quantity=50.0, unit_cost=45.50, reference_type="purchase", notes="Initial stock purchase", created_by="admin"),
+            StockMovement(inventory_item_id=inventory_items[1].id, movement_type="in", quantity=75.0, unit_cost=28.75, reference_type="purchase", notes="Weekly delivery", created_by="admin"),
+            StockMovement(inventory_item_id=inventory_items[0].id, movement_type="out", quantity=-35.0, reference_type="job", reference_id=jobs[0].id, notes="Used for Queen Street installation", created_by="admin"),
+            StockMovement(inventory_item_id=inventory_items[1].id, movement_type="out", quantity=-28.0, reference_type="job", reference_id=jobs[1].id, notes="Used for Ponsonby Road installation", created_by="admin"),
+            StockMovement(inventory_item_id=inventory_items[5].id, movement_type="in", quantity=20.0, unit_cost=15.80, reference_type="purchase", notes="Adhesive restock", created_by="admin")
+        ]
+        
+        for movement in stock_movements:
+            db.session.add(movement)
+        
         db.session.commit()
         
-        flash('Database reset successfully! Sample data has been restored.', 'success')
+        flash('Database reset successfully! Comprehensive sample data has been restored including 4 retailers, 8 jobs, 6 invoices, 10 inventory items, and stock movements.', 'success')
     except Exception as e:
         db.session.rollback()
         flash(f'Error resetting database: {str(e)}', 'error')
