@@ -28,6 +28,15 @@
                         {% endfor %}
                     </div>
                 </div>
+                
+                <!-- Add New Job Button when jobs exist -->
+                <div class="bg-green-50 rounded-xl shadow-lg p-6">
+                    <a href="{{ url_for('add_job') }}" 
+                       class="inline-block bg-green-600 hover:bg-green-700 text-white text-xl font-semibold py-4 px-8 rounded-lg transition-colors duration-200 shadow-md">
+                        ➕ Add Another Job
+                    </a>
+                    <p class="text-sm text-green-700 mt-2">Add more carpet installation jobs</p>
+                </div>
             {% else %}
                 <!-- No jobs available message -->
                 <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
