@@ -22,8 +22,20 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///carpet_invoices.db")
+# Configure the database with fallback to SQLite
+database_url = os.environ.get("DATABASE_URL", "sqlite:///carpet_invoices.db")
+
+# Handle the case where DATABASE_URL points to a disabled endpoint
+try:
+    import psycopg2
+    if database_url.startswith("postgresql://") and "ep-weathered-paper-a2pobj3q" in database_url:
+        # Use SQLite instead of the disabled Neon endpoint
+        database_url = "sqlite:///carpet_invoices.db"
+        print("Warning: Using SQLite fallback due to disabled PostgreSQL endpoint")
+except ImportError:
+    pass
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
