@@ -3,17 +3,23 @@
 {% block title %}Invoices - Carpet Invoices{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900">Invoices</h1>
-        <p class="mt-2 text-gray-600">Manage all your carpet installation invoices</p>
-    </div>
-    <div class="mt-4 sm:mt-0">
-        <a href="{{ url_for('jobs') }}" class="btn-primary">
-            <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
-            Create Invoice
-        </a>
+<!-- Primary Actions -->
+<div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-6 mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div class="text-white mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold">Invoices</h1>
+            <p class="mt-1 text-blue-100">Manage all your carpet installation invoices</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{{ url_for('jobs') }}" class="bg-white hover:bg-gray-100 text-blue-700 font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="plus" class="inline h-5 w-5 mr-2"></i>
+                Create Invoice
+            </a>
+            <a href="{{ url_for('add_job') }}" class="bg-blue-500 hover:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="briefcase" class="inline h-5 w-5 mr-2"></i>
+                Add Job
+            </a>
+        </div>
     </div>
 </div>
 

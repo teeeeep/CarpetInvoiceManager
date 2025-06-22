@@ -3,17 +3,23 @@
 {% block title %}Retailers - Carpet Invoices{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900">Retailers</h1>
-        <p class="mt-2 text-gray-600">Manage your carpet retailer partners</p>
-    </div>
-    <div class="mt-4 sm:mt-0">
-        <a href="{{ url_for('add_retailer') }}" class="btn-primary">
-            <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
-            Add Retailer
-        </a>
+<!-- Primary Actions -->
+<div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-lg p-6 mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div class="text-white mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold">Retailers</h1>
+            <p class="mt-1 text-purple-100">Manage your carpet retail partners</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{{ url_for('add_retailer') }}" class="bg-white hover:bg-gray-100 text-purple-700 font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="plus" class="inline h-5 w-5 mr-2"></i>
+                Add Retailer
+            </a>
+            <a href="{{ url_for('add_job') }}" class="bg-purple-500 hover:bg-purple-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="briefcase" class="inline h-5 w-5 mr-2"></i>
+                Create Job
+            </a>
+        </div>
     </div>
 </div>
 
@@ -30,7 +36,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
             <div class="p-3 rounded-full bg-green-100">
@@ -48,7 +54,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center">
             <div class="p-3 rounded-full bg-purple-100">
@@ -74,7 +80,7 @@
 <div class="bg-white rounded-lg shadow">
     <div class="p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">All Retailers</h2>
-        
+
         {% if retailers %}
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -205,7 +211,7 @@
                     <p class="text-xs text-gray-500">Create installation job</p>
                 </div>
             </a>
-            
+
             <a href="{{ url_for('jobs') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
                 <div class="flex-shrink-0">
                     <i data-feather="list" class="h-6 w-6 text-blue-600"></i>
@@ -215,7 +221,7 @@
                     <p class="text-xs text-gray-500">Manage current jobs</p>
                 </div>
             </a>
-            
+
             <a href="{{ url_for('invoices') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
                 <div class="flex-shrink-0">
                     <i data-feather="file-text" class="h-6 w-6 text-purple-600"></i>
@@ -236,7 +242,271 @@
 <script>
     // Initialize Feather icons
     feather.replace();
-    
+
+    // Add confirmation for delete actions
+    document.querySelectorAll('a[title="Delete Retailer"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Are you sure you want to delete this retailer? This action cannot be undone.')) {
+                // Implement delete functionality here
+                console.log('Delete retailer functionality to be implemented');
+            }
+        });
+    });
+</script>
+{% endblock %}
+```
+
+```analysis
+The code moves the "Add Retailer" and "Create Job" actions to the top of the page within a prominent purple-themed section, enhancing their visibility and user accessibility.
+```
+
+```replit_final_file
+{% extends "base.html" %}
+
+{% block title %}Retailers - Carpet Invoices{% endblock %}
+
+{% block content %}
+<!-- Primary Actions -->
+<div class="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg shadow-lg p-6 mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div class="text-white mb-4 sm:mb-0">
+            <h1 class="text-3xl font-bold">Retailers</h1>
+            <p class="mt-1 text-purple-100">Manage your carpet retail partners</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="{{ url_for('add_retailer') }}" class="bg-white hover:bg-gray-100 text-purple-700 font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="plus" class="inline h-5 w-5 mr-2"></i>
+                Add Retailer
+            </a>
+            <a href="{{ url_for('add_job') }}" class="bg-purple-500 hover:bg-purple-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 shadow-md text-center">
+                <i data-feather="briefcase" class="inline h-5 w-5 mr-2"></i>
+                Create Job
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100">
+                <i data-feather="users" class="h-6 w-6 text-blue-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Retailers</p>
+                <p class="text-2xl font-bold text-gray-900">{{ retailers|length }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100">
+                <i data-feather="briefcase" class="h-6 w-6 text-green-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Active Jobs</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {% set total_jobs = 0 %}
+                    {% for retailer in retailers %}
+                        {% set total_jobs = total_jobs + retailer.jobs|length %}
+                    {% endfor %}
+                    {{ total_jobs }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-100">
+                <i data-feather="file-text" class="h-6 w-6 text-purple-600"></i>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Invoices</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    {% set total_invoices = 0 %}
+                    {% for retailer in retailers %}
+                        {% for job in retailer.jobs %}
+                            {% set total_invoices = total_invoices + job.invoices|length %}
+                        {% endfor %}
+                    {% endfor %}
+                    {{ total_invoices }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Retailers List -->
+<div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">All Retailers</h2>
+
+        {% if retailers %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Retailer
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Contact Details
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Jobs
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Invoices
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for retailer in retailers %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10">
+                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                        <i data-feather="user" class="h-5 w-5 text-gray-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ retailer.name }}</div>
+                                    <div class="text-sm text-gray-500">Retailer ID: {{ retailer.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                <div class="flex items-center mb-1">
+                                    <i data-feather="mail" class="h-4 w-4 mr-2 text-gray-400"></i>
+                                    <a href="mailto:{{ retailer.email }}" class="text-blue-600 hover:text-blue-800">
+                                        {{ retailer.email }}
+                                    </a>
+                                </div>
+                                <div class="flex items-center">
+                                    <i data-feather="phone" class="h-4 w-4 mr-2 text-gray-400"></i>
+                                    <a href="tel:{{ retailer.phone }}" class="text-blue-600 hover:text-blue-800">
+                                        {{ retailer.phone }}
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ retailer.jobs|length }} jobs
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">
+                                {% set invoice_count = 0 %}
+                                {% for job in retailer.jobs %}
+                                    {% set invoice_count = invoice_count + job.invoices|length %}
+                                {% endfor %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if invoice_count > 0 %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ invoice_count }} invoices
+                                </span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('add_job') }}?retailer_id={{ retailer.id }}" 
+                                   class="text-blue-600 hover:text-blue-800" title="Add Job">
+                                    <i data-feather="plus-circle" class="h-4 w-4"></i>
+                                </a>
+                                <a href="#" class="text-indigo-600 hover:text-indigo-800" title="Edit Retailer">
+                                    <i data-feather="edit" class="h-4 w-4"></i>
+                                </a>
+                                <a href="#" class="text-red-600 hover:text-red-800" title="Delete Retailer">
+                                    <i data-feather="trash-2" class="h-4 w-4"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <i data-feather="users" class="h-12 w-12 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No retailers yet</h3>
+            <p class="text-gray-500 mb-6">Get started by adding your first carpet retailer partner.</p>
+            <div class="space-y-3 sm:space-y-0 sm:space-x-3 sm:flex sm:justify-center">
+                <a href="{{ url_for('add_retailer') }}" class="btn-primary">
+                    <i data-feather="plus" class="inline h-4 w-4 mr-2"></i>
+                    Add First Retailer
+                </a>
+                <a href="{{ url_for('index') }}" class="btn-secondary">
+                    <i data-feather="arrow-left" class="inline h-4 w-4 mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+{% if retailers %}
+<div class="mt-8 bg-white rounded-lg shadow">
+    <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{{ url_for('add_job') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                <div class="flex-shrink-0">
+                    <i data-feather="briefcase" class="h-6 w-6 text-green-600"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Add New Job</p>
+                    <p class="text-xs text-gray-500">Create installation job</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('jobs') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                <div class="flex-shrink-0">
+                    <i data-feather="list" class="h-6 w-6 text-blue-600"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">View All Jobs</p>
+                    <p class="text-xs text-gray-500">Manage current jobs</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('invoices') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-200">
+                <div class="flex-shrink-0">
+                    <i data-feather="file-text" class="h-6 w-6 text-purple-600"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">View Invoices</p>
+                    <p class="text-xs text-gray-500">Manage invoices</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Initialize Feather icons
+    feather.replace();
+
     // Add confirmation for delete actions
     document.querySelectorAll('a[title="Delete Retailer"]').forEach(link => {
         link.addEventListener('click', function(e) {
