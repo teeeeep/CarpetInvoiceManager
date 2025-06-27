@@ -160,11 +160,16 @@
         let subtotal = 0;
         
         document.querySelectorAll('.invoice-line').forEach(line => {
-            const unitPrice = parseFloat(line.querySelector('.unit-price').value) || 0;
-            const quantity = parseInt(line.querySelector('.quantity').value) || 0;
+            const unitPriceInput = line.querySelector('.unit-price');
+            const quantityInput = line.querySelector('.quantity');
+            const lineTotalDisplay = line.querySelector('.line-total');
+            
+            // Use parseFloat for both to handle decimal quantities
+            const unitPrice = parseFloat(unitPriceInput.value) || 0;
+            const quantity = parseFloat(quantityInput.value) || 0;
             const lineTotal = unitPrice * quantity;
             
-            line.querySelector('.line-total').textContent = formatCurrency(lineTotal);
+            lineTotalDisplay.textContent = formatCurrency(lineTotal);
             subtotal += lineTotal;
         });
         
@@ -251,7 +256,11 @@
             const removeBtn = div.querySelector('.remove-line');
             
             unitPrice.addEventListener('input', calculateTotals);
+            unitPrice.addEventListener('change', calculateTotals);
+            unitPrice.addEventListener('keyup', calculateTotals);
             quantity.addEventListener('input', calculateTotals);
+            quantity.addEventListener('change', calculateTotals);
+            quantity.addEventListener('keyup', calculateTotals);
             removeBtn.addEventListener('click', function() {
                 div.remove();
                 updateRemoveButtons();
@@ -273,8 +282,13 @@
         
         
         // Add event listeners to initial line
-        document.querySelector('.unit-price').addEventListener('input', calculateTotals);
-        document.querySelector('.quantity').addEventListener('input', calculateTotals);
+        const initialUnitPrice = document.querySelector('.unit-price');
+        const initialQuantity = document.querySelector('.quantity');
+        
+        initialUnitPrice.addEventListener('input', calculateTotals);
+        initialUnitPrice.addEventListener('change', calculateTotals);
+        initialQuantity.addEventListener('input', calculateTotals);
+        initialQuantity.addEventListener('change', calculateTotals);
         
         // Initialize
         updateRemoveButtons();
