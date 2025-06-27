@@ -64,7 +64,7 @@ class InvoiceLine(db.Model):
     invoice_id = db.Column(db.Integer, ForeignKey('invoice.id'), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
     line_total = db.Column(db.Float, nullable=False)
     
     # Relationships

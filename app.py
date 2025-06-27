@@ -408,7 +408,7 @@ def create_invoice():
     for desc, price, qty in zip(descriptions, unit_prices, quantities):
         if desc and price and qty:
             unit_price = float(price)
-            quantity = int(qty)
+            quantity = float(qty)
             line_total = unit_price * quantity
 
             line = InvoiceLine(
