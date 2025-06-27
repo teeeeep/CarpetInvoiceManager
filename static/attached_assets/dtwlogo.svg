@@ -1,0 +1,28 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="80" fill="white"/>
+  
+  <!-- Main brand green circle -->
+  <circle cx="40" cy="40" r="30" fill="#148b3d"/>
+  
+  <!-- Carpet roll icon in white -->
+  <g transform="translate(25, 25)" fill="white">
+    <!-- Carpet roll representation -->
+    <rect x="0" y="15" width="30" height="4" rx="2"/>
+    <rect x="0" y="21" width="30" height="4" rx="2"/>
+    <rect x="0" y="27" width="30" height="4" rx="2"/>
+    <!-- Side edge to show roll -->
+    <ellipse cx="30" cy="25" rx="3" ry="8" fill="#0f7332"/>
+  </g>
+  
+  <!-- Company text -->
+  <text x="85" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#148b3d">
+    Dave Taiepa &amp; Whānau
+  </text>
+  <text x="85" y="42" font-family="Arial, sans-serif" font-size="14" fill="#093d20">
+    Carpet Installation
+  </text>
+  <text x="85" y="58" font-family="Arial, sans-serif" font-size="12" fill="#666">
+    New Zealand
+  </text>
+</svg>

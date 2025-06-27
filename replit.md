@@ -109,6 +109,8 @@ Comprehensive environment variables for:
 - June 19, 2025. Added PDF style selection with three distinct templates (Professional Blue, Colorful Fun, Minimalist)
 - June 20, 2025. Added simplified homepage (/simple-home) designed for older users with large buttons and plain English
 - June 21, 2025. Enhanced file naming structure and improved invoice search functionality with filtering and sorting
+- June 22, 2025. Fixed database connection issues by implementing SQLite fallback for disabled PostgreSQL endpoints
+- June 22, 2025. Resolved PDF logo loading issue by creating professional SVG logo and fixing template references
 
 ## User Preferences
 

@@ -8,7 +8,7 @@
         size: A4;
         margin: 2cm;
         @top-center {
-            content: "Invoice {{ invoice.invoice_code }}";
+            content: "{{ invoice.job.street_address }}, Invoice# {{ invoice.invoice_code }}";
             font-size: 10pt;
             color: #666;
         }
@@ -19,23 +19,34 @@
         }
     }
 
+    /* ——— Brand palette ——— */
+    :root {
+        --brand-green: #148b3d;   /* matches roll graphic */
+        --brand-green-light: #e8f5e9;  /* soft tint for table rows/boxes */
+        --text-dark: #093d20;     /* deep green for headings/body */
+    }
+
     body {
         font-family: Arial, sans-serif;
         font-size: 12pt;
         line-height: 1.4;
-        color: #333;
+        color: var(--text-dark);
     }
 
     .invoice-header {
-        border-bottom: 2px solid #0891b2;
+        border-bottom: 2px solid var(--brand-green);
         padding-bottom: 20px;
         margin-bottom: 30px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
     }
 
-    .company-info {
-        text-align: right;
-        margin-bottom: 20px;
-    }
+    .logo { height: 80px; }
+
+    .company-info { text-align: right; margin-bottom: 20px; }
 
     .invoice-details {
         display: flex;
@@ -43,9 +54,7 @@
         margin-bottom: 30px;
     }
 
-    .bill-to, .invoice-info {
-        width: 45%;
-    }
+    .bill-to, .invoice-info { width: 45%; }
 
     .invoice-table {
         width: 100%;
@@ -61,35 +70,23 @@
     }
 
     .invoice-table th {
-        background-color: #f8fafc;
+        background-color: var(--brand-green-light);
         font-weight: bold;
-        border-bottom: 2px solid #0891b2;
+        border-bottom: 2px solid var(--brand-green);
     }
 
-    .invoice-table .text-right {
-        text-align: right;
-    }
+    .invoice-table .text-right { text-align: right; }
 
-    .totals-section {
-        float: right;
-        width: 300px;
-        margin-top: 20px;
-    }
+    .totals-section { float: right; width: 300px; margin-top: 20px; }
 
-    .totals-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+    .totals-table { width: 100%; border-collapse: collapse; }
 
-    .totals-table td {
-        padding: 8px 12px;
-        border-bottom: 1px solid #ddd;
-    }
+    .totals-table td { padding: 8px 12px; border-bottom: 1px solid #ddd; }
 
     .totals-table .total-row {
         font-weight: bold;
-        background-color: #f8fafc;
-        border-top: 2px solid #0891b2;
+        background-color: var(--brand-green-light);
+        border-top: 2px solid var(--brand-green);
     }
 
     .footer {
@@ -104,50 +101,55 @@
     .payment-terms {
         margin-top: 30px;
         padding: 15px;
-        background-color: #f8fafc;
-        border-left: 4px solid #0891b2;
+        background-color: var(--brand-green-light);
+        border-left: 4px solid var(--brand-green);
     }
 </style>
-
+        
 <div class="invoice-container">
     <!-- Company Header -->
     <div class="invoice-header">
+        <!-- Logo -->
+        <img class="logo"
+             src="{{ url_for('static', filename='attached_assets/dtwlogo.svg') }}"
+             alt="Dave Taiepa &amp; Whānau Ltd logo" />
+
         <div class="company-info">
-            <h1 style="margin: 0; color: #0891b2; font-size: 24pt;">Carpet Invoices</h1>
-            <p style="margin: 5px 0;">Professional Carpet Installation Services</p>
-            <p style="margin: 5px 0;">New Zealand</p>
-            <p style="margin: 5px 0;">Email: info@carpetinvoices.co.nz</p>
-            <p style="margin: 5px 0;">Phone: 0800-CARPET</p>
+            <h1 style="margin: 0; color: var(--brand-green); font-size: 24pt;">Carpet&nbsp;Invoices</h1>
+            <p style="margin: 5px 0;">Dave Taiepa &amp; Whānau Limited</p>
+            <p style="margin: 5px 0;">New&nbsp;Zealand</p>
+            <p style="margin: 5px 0;">Email: davetaiepa@yahoo.com</p>
+            <p style="margin: 5px 0;">Phone: +64&nbsp;27&nbsp;434&nbsp;2411</p>
         </div>
     </div>
 
     <!-- Invoice Details -->
     <div class="invoice-details">
         <div class="bill-to">
-            <h3 style="color: #0891b2; margin-bottom: 15px;">Bill To:</h3>
+            <h3 style="color: var(--brand-green); margin-bottom: 15px;">Bill&nbsp;To:</h3>
             <p><strong>{{ invoice.job.retailer.name }}</strong></p>
             <p>{{ invoice.job.retailer.email }}</p>
             <p>{{ invoice.job.retailer.phone }}</p>
             <br>
-            <p><strong>Installation Address:</strong></p>
+            <p><strong>Installation&nbsp;Address:</strong></p>
             <p>{{ invoice.job.street_address }}</p>
             <p>{{ invoice.job.suburb }}, {{ invoice.job.town_city }}</p>
             <p><strong>Homeowner:</strong> {{ invoice.job.homeowner_name }}</p>
         </div>
 
         <div class="invoice-info">
-            <h3 style="color: #0891b2; margin-bottom: 15px;">Invoice Details:</h3>
+            <h3 style="color: var(--brand-green); margin-bottom: 15px;">Invoice&nbsp;Details:</h3>
             <table style="width: 100%;">
                 <tr>
-                    <td><strong>Invoice Number:</strong></td>
+                    <td><strong>Invoice&nbsp;Number:</strong></td>
                     <td>{{ invoice.invoice_code }}</td>
                 </tr>
                 <tr>
-                    <td><strong>Invoice Date:</strong></td>
+                    <td><strong>Invoice&nbsp;Date:</strong></td>
                     <td>{{ invoice.date_created|nz_date }}</td>
                 </tr>
                 <tr>
-                    <td><strong>Job Completed:</strong></td>
+                    <td><strong>Job&nbsp;Completed:</strong></td>
                     <td>{{ invoice.job.date_completed|nz_date }}</td>
                 </tr>
                 <tr>
@@ -164,7 +166,7 @@
             <tr>
                 <th>Description</th>
                 <th class="text-right">Qty</th>
-                <th class="text-right">Unit Price</th>
+                <th class="text-right">Unit&nbsp;Price</th>
                 <th class="text-right">Total</th>
             </tr>
         </thead>
@@ -188,7 +190,7 @@
                 <td class="text-right">{{ invoice.subtotal|nz_currency }}</td>
             </tr>
             <tr>
-                <td>GST ({{ invoice.gst_percentage }}%):</td>
+                <td>GST&nbsp;({{ invoice.gst_percentage }}%):</td>
                 <td class="text-right">{{ invoice.gst_amount|nz_currency }}</td>
             </tr>
             <tr class="total-row">
@@ -200,8 +202,8 @@
 
     <!-- Payment Terms -->
     <div class="payment-terms">
-        <h4 style="margin-top: 0; color: #0891b2;">Payment Terms</h4>
-        <p style="margin: 5px 0;">Payment is due within 30 days of invoice date.</p>
+        <h4 style="margin-top: 0; color: var(--brand-green);">Payment&nbsp;Terms</h4>
+        <p style="margin: 5px 0;">Payment is due within 30&nbsp;days of invoice date unless otherwise specified.</p>
         <p style="margin: 5px 0;">Please reference invoice number {{ invoice.invoice_code }} when making payment.</p>
         <p style="margin: 5px 0;">Bank transfer details available upon request.</p>
     </div>
