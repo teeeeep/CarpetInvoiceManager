@@ -454,7 +454,7 @@ def invoice_pdf(invoice_id):
     style = request.args.get('style', 'style1')
     
     # Validate style parameter
-    valid_styles = ['style1', 'style2', 'style3']
+    valid_styles = ['style1', 'style2', 'style3', 'style4', 'style5', 'style6', 'style7', 'style8']
     if style not in valid_styles:
         style = 'style1'
 

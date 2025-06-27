@@ -34,7 +34,7 @@
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Download PDF</h2>
         <p class="text-gray-600 mb-4">Choose your preferred PDF style:</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <!-- Style 1 - Professional Blue -->
             <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors">
                 <div class="flex items-center justify-between mb-3">
@@ -67,14 +67,84 @@
                 </a>
             </div>
             
-            <!-- Style 3 - Minimalist -->
+            <!-- Style 3 - Minimalist Black -->
             <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-800 transition-colors">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-medium text-gray-900">Minimalist</h3>
+                    <h3 class="font-medium text-gray-900">Minimalist Black</h3>
                     <div class="w-6 h-6 bg-gray-800 rounded"></div>
                 </div>
                 <p class="text-sm text-gray-600 mb-3">Ultra-clean black and white design. Modern, sophisticated aesthetic.</p>
                 <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style3') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+
+            <!-- Style 4 - Minimal -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-gray-400 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Minimal</h3>
+                    <div class="w-6 h-6 bg-gray-400 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Clean, simple design with subtle gray borders. Perfect for understated elegance.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style4') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+
+            <!-- Style 5 - Coastal -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Coastal</h3>
+                    <div class="w-6 h-6 bg-blue-400 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Ocean-inspired blue theme with soft, calming colors. Great for seaside businesses.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style5') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+
+            <!-- Style 6 - Forest -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Forest</h3>
+                    <div class="w-6 h-6 bg-green-500 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Nature-inspired green theme with organic feel. Perfect for eco-friendly businesses.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style6') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+
+            <!-- Style 7 - Amber -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-yellow-600 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Amber</h3>
+                    <div class="w-6 h-6 bg-yellow-600 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Warm golden theme with rich amber accents. Conveys luxury and warmth.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style7') }}" 
+                   class="btn-secondary w-full text-center text-sm">
+                    <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
+                    Download
+                </a>
+            </div>
+
+            <!-- Style 8 - Coral -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:border-red-400 transition-colors">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-medium text-gray-900">Coral</h3>
+                    <div class="w-6 h-6 bg-red-400 rounded"></div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Vibrant coral theme with modern appeal. Eye-catching and contemporary.</p>
+                <a href="{{ url_for('invoice_pdf', invoice_id=invoice.id, style='style8') }}" 
                    class="btn-secondary w-full text-center text-sm">
                     <i data-feather="download" class="inline h-4 w-4 mr-2"></i>
                     Download

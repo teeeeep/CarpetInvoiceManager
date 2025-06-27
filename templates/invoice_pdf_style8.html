@@ -1,0 +1,222 @@
+
+{% extends "base.html" %}
+
+{% block title %}Invoice {{ invoice.invoice_code }}{% endblock %}
+
+{% block content %}
+<style>
+    @page {
+        size: A4;
+        margin: 2cm;
+        @top-center {
+            content: "Invoice {{ invoice.invoice_code }}";
+            font-size: 10pt;
+            color: #666;
+        }
+        @bottom-center {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 10pt;
+            color: #666;
+        }
+    }
+
+    body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        font-size: 12pt;
+        line-height: 1.4;
+        color: #202020;
+        background: #fff;
+    }
+
+    .invoice-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        border: 1px solid #ff6f61;
+        border-radius: 4px;
+        background: #fff;
+    }
+
+    .invoice-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .invoice-header h1 {
+        font-size: 28pt;
+        margin: 0;
+        color: #202020;
+    }
+
+    .company-info, .invoice-meta {
+        font-style: normal;
+        font-size: 14pt;
+        line-height: 1.4;
+    }
+
+    .invoice-details {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        gap: 2rem;
+    }
+
+    .bill-to, .invoice-info {
+        width: 45%;
+        font-size: 14pt;
+        line-height: 1.4;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+        font-size: 15pt;
+    }
+
+    .invoice-table th {
+        text-align: left;
+        border-bottom: 2px solid #ff6f61;
+        padding: 12pt 8pt;
+        font-weight: 600;
+    }
+
+    .invoice-table td {
+        padding: 8pt;
+        border-bottom: 1px solid #ff6f61;
+    }
+
+    .invoice-table .text-right {
+        text-align: right;
+    }
+
+    .totals-section {
+        float: right;
+        width: 300px;
+        margin-top: 20px;
+    }
+
+    .totals-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .totals-table td {
+        padding: 12pt 8pt;
+        font-weight: 600;
+        border: none;
+    }
+
+    .totals-table .total-row {
+        font-weight: bold;
+        font-size: 16pt;
+    }
+
+    .footer {
+        margin-top: 50px;
+        padding-top: 20px;
+        border-top: 1px solid #ff6f61;
+        font-size: 10pt;
+        color: #666;
+        clear: both;
+    }
+
+    .payment-terms {
+        margin-top: 30px;
+        padding: 15px;
+        border-top: 1px solid #ff6f61;
+    }
+</style>
+
+<div class="invoice-container">
+    <!-- Company Header -->
+    <div class="invoice-header">
+        <h1>INVOICE</h1>
+        <div class="invoice-meta">
+            <strong>{{ invoice.invoice_code }}</strong><br>
+            {{ invoice.date_created|nz_date }}
+        </div>
+    </div>
+
+    <!-- Invoice Details -->
+    <div class="invoice-details">
+        <div class="bill-to">
+            <div class="company-info">
+                <strong>Carpet Invoices</strong><br>
+                Professional Carpet Installation<br>
+                New Zealand<br>
+                info@carpetinvoices.co.nz<br>
+                0800-CARPET
+            </div>
+        </div>
+
+        <div class="invoice-info">
+            <div class="company-info">
+                <strong>Bill To</strong><br>
+                {{ invoice.job.retailer.name }}<br>
+                {{ invoice.job.retailer.email }}<br>
+                {{ invoice.job.retailer.phone }}<br><br>
+                <strong>Installation Address</strong><br>
+                {{ invoice.job.street_address }}<br>
+                {{ invoice.job.suburb }}, {{ invoice.job.town_city }}<br>
+                <strong>Homeowner:</strong> {{ invoice.job.homeowner_name }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Items -->
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for line in invoice.lines %}
+            <tr>
+                <td>{{ line.description }}</td>
+                <td class="text-right">{{ line.quantity }}</td>
+                <td class="text-right">{{ line.line_total|nz_currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr>
+                <td>Subtotal</td>
+                <td class="text-right">{{ invoice.subtotal|nz_currency }}</td>
+            </tr>
+            <tr>
+                <td>GST ({{ invoice.gst_percentage }}%)</td>
+                <td class="text-right">{{ invoice.gst_amount|nz_currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Grand Total</td>
+                <td class="text-right">{{ invoice.total|nz_currency }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Payment Terms -->
+    <div class="payment-terms">
+        <p style="margin: 5px 0;">Payment is due within 30 days of invoice date.</p>
+        <p style="margin: 5px 0;">Please reference invoice number {{ invoice.invoice_code }} when making payment.</p>
+        <p style="margin: 5px 0;">Bank transfer details available upon request.</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Thank you for choosing our carpet installation services.</p>
+        <p>This invoice was generated on {{ invoice.date_created|nz_date }} NZT</p>
+    </div>
+</div>
+{% endblock %}
