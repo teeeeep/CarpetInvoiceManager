@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Invoice Theme Preview</title><style>
+/* Invoice Theme Library */
+.invoice{
+  --primary:#333;
+  --accent:#666;
+  --bg:#fff;
+  --font:'Helvetica Neue',Arial,sans-serif;
+  --radius:4px;
+  color:var(--primary);
+  background:var(--bg);
+  font-family:var(--font);
+  max-width:800px;
+  margin:2rem auto;
+  padding:2rem;
+  border:1px solid var(--accent);
+  border-radius:var(--radius);
+}
+.invoice header{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:2rem;
+  gap:1rem;
+}
+.invoice h1{font-size:1.75rem;margin:0;}
+.invoice address,.invoice .meta{font-style:normal;font-size:0.875rem;line-height:1.4;}
+.invoice table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:0.9375rem;}
+.invoice thead th{text-align:left;border-bottom:2px solid var(--accent);padding:0.75rem 0.5rem;font-weight:600;}
+.invoice tbody td{padding:0.5rem;border-bottom:1px solid var(--accent);}
+.invoice tfoot td{padding:0.75rem 0.5rem;font-weight:600;border:none;}
+.invoice .btn{display:inline-block;padding:0.5rem 1rem;border-radius:var(--radius);background:var(--accent);color:var(--bg);text-decoration:none;font-size:0.875rem;transition:opacity .2s;}
+.invoice .btn:hover{opacity:.85;}
+/* Themes */
+.invoice.theme-minimal{--primary:#222;--accent:#d1d5db;--bg:#fff;}
+.invoice.theme-coastal{--primary:#062e4b;--accent:#b9d6e2;--bg:#f7fbfd;}
+.invoice.theme-forest{--primary:#143d14;--accent:#cfe6cf;--bg:#fbfefb;}
+.invoice.theme-amber{--primary:#3d2b00;--accent:#ffbf00;--bg:#fffaf0;}
+.invoice.theme-coral{--primary:#202020;--accent:#ff6f61;--bg:#fff;}
+@media(max-width:640px){
+  .invoice{padding:1.25rem;}
+  .invoice h1{font-size:1.375rem;}
+  .invoice thead{display:none;}
+  .invoice tr{display:grid;grid-template-columns:4fr 1fr 1fr;gap:0.25rem;}
+  .invoice tr td[data-label]:before{content:attr(data-label)"\00a0";font-weight:600;}
+}
+body{background:#f0f0f0;font-family:system-ui,Arial,sans-serif;}
+h2.theme-title{text-align:center;margin-top:3rem;font-size:1.5rem;}
+</style></head><body><h2 class='theme-title'>Minimal</h2>
+<article class="invoice theme-minimal">
+  <header>
+    <h1>Invoice</h1>
+    <div class="meta">
+      <strong>#12345</strong><br>
+      27&nbsp;Jun&nbsp;2025
+    </div>
+    <address>
+      <strong>Aroha Carpets Ltd</strong><br>
+      12 Papanui Rd<br>
+      Christchurch 8014
+    </address>
+    <address>
+      <strong>Client</strong><br>
+      45 Beach Rd<br>
+      Kaikōura 7300
+    </address>
+  </header>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="Description">Carpet install – Lounge</td><td data-label="Qty">1</td><td data-label="Total">$900</td></tr>
+      <tr><td data-label="Description">Underlay upgrade</td><td data-label="Qty">1</td><td data-label="Total">$120</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Grand Total</td><td>$1,020</td></tr>
+    </tfoot>
+  </table>
+  <a href="#" class="btn">Pay now</a>
+</article>
+<h2 class='theme-title'>Coastal</h2>
+<article class="invoice theme-coastal">
+  <header>
+    <h1>Invoice</h1>
+    <div class="meta">
+      <strong>#12345</strong><br>
+      27&nbsp;Jun&nbsp;2025
+    </div>
+    <address>
+      <strong>Aroha Carpets Ltd</strong><br>
+      12 Papanui Rd<br>
+      Christchurch 8014
+    </address>
+    <address>
+      <strong>Client</strong><br>
+      45 Beach Rd<br>
+      Kaikōura 7300
+    </address>
+  </header>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="Description">Carpet install – Lounge</td><td data-label="Qty">1</td><td data-label="Total">$900</td></tr>
+      <tr><td data-label="Description">Underlay upgrade</td><td data-label="Qty">1</td><td data-label="Total">$120</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Grand Total</td><td>$1,020</td></tr>
+    </tfoot>
+  </table>
+  <a href="#" class="btn">Pay now</a>
+</article>
+<h2 class='theme-title'>Forest</h2>
+<article class="invoice theme-forest">
+  <header>
+    <h1>Invoice</h1>
+    <div class="meta">
+      <strong>#12345</strong><br>
+      27&nbsp;Jun&nbsp;2025
+    </div>
+    <address>
+      <strong>Aroha Carpets Ltd</strong><br>
+      12 Papanui Rd<br>
+      Christchurch 8014
+    </address>
+    <address>
+      <strong>Client</strong><br>
+      45 Beach Rd<br>
+      Kaikōura 7300
+    </address>
+  </header>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="Description">Carpet install – Lounge</td><td data-label="Qty">1</td><td data-label="Total">$900</td></tr>
+      <tr><td data-label="Description">Underlay upgrade</td><td data-label="Qty">1</td><td data-label="Total">$120</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Grand Total</td><td>$1,020</td></tr>
+    </tfoot>
+  </table>
+  <a href="#" class="btn">Pay now</a>
+</article>
+<h2 class='theme-title'>Amber</h2>
+<article class="invoice theme-amber">
+  <header>
+    <h1>Invoice</h1>
+    <div class="meta">
+      <strong>#12345</strong><br>
+      27&nbsp;Jun&nbsp;2025
+    </div>
+    <address>
+      <strong>Aroha Carpets Ltd</strong><br>
+      12 Papanui Rd<br>
+      Christchurch 8014
+    </address>
+    <address>
+      <strong>Client</strong><br>
+      45 Beach Rd<br>
+      Kaikōura 7300
+    </address>
+  </header>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="Description">Carpet install – Lounge</td><td data-label="Qty">1</td><td data-label="Total">$900</td></tr>
+      <tr><td data-label="Description">Underlay upgrade</td><td data-label="Qty">1</td><td data-label="Total">$120</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Grand Total</td><td>$1,020</td></tr>
+    </tfoot>
+  </table>
+  <a href="#" class="btn">Pay now</a>
+</article>
+<h2 class='theme-title'>Coral</h2>
+<article class="invoice theme-coral">
+  <header>
+    <h1>Invoice</h1>
+    <div class="meta">
+      <strong>#12345</strong><br>
+      27&nbsp;Jun&nbsp;2025
+    </div>
+    <address>
+      <strong>Aroha Carpets Ltd</strong><br>
+      12 Papanui Rd<br>
+      Christchurch 8014
+    </address>
+    <address>
+      <strong>Client</strong><br>
+      45 Beach Rd<br>
+      Kaikōura 7300
+    </address>
+  </header>
+  <table>
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td data-label="Description">Carpet install – Lounge</td><td data-label="Qty">1</td><td data-label="Total">$900</td></tr>
+      <tr><td data-label="Description">Underlay upgrade</td><td data-label="Qty">1</td><td data-label="Total">$120</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="2">Grand Total</td><td>$1,020</td></tr>
+    </tfoot>
+  </table>
+  <a href="#" class="btn">Pay now</a>
+</article>
+</body></html>

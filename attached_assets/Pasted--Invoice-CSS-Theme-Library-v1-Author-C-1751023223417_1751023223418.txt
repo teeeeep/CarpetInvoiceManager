@@ -1,0 +1,144 @@
+/* --------------------------------------------------
+   Invoice CSS Theme Library (v1)
+   Author: ChatGPT (generated for Taane)
+   Description: Reusable, mobile‑friendly invoice styles.
+   Usage: 
+     1. Link this sheet after your reset/tailwind output.
+     2. Wrap your invoice markup with a container <article class="invoice theme-coastal">…</article>
+     3. Swap out the theme-XXXX class to change look & feel.
+--------------------------------------------------*/
+
+/* ---------- Base Layout ---------- */
+.invoice {
+  /* CSS Custom Properties drive theming */
+  --primary: #333333;   /* main text colour */
+  --accent:  #666666;   /* borders, secondary text */
+  --bg:      #ffffff;   /* background */
+  --font:    'Helvetica Neue', Arial, sans-serif;
+  --radius:  4px;
+  color: var(--primary);
+  background: var(--bg);
+  font-family: var(--font);
+
+  /* responsive width */
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.invoice header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  gap: 1rem;
+}
+
+.invoice h1 {
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+.invoice address, .invoice .meta {
+  font-style: normal;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Tables (line items & totals) */
+.invoice table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.invoice thead th {
+  text-align: left;
+  border-bottom: 2px solid var(--accent);
+  padding: 0.75rem 0.5rem;
+  font-weight: 600;
+}
+
+.invoice tbody td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--accent);
+}
+
+.invoice tfoot td {
+  padding: 0.75rem 0.5rem;
+  font-weight: 600;
+  border: none;
+}
+
+/* Buttons / Links */
+.invoice .btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--bg);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: opacity 0.2s ease;
+}
+.invoice .btn:hover { opacity: 0.85; }
+
+/* ---------- Theme Palette Overrides ---------- */
+/* 1. Minimal Monochrome */
+.invoice.theme-minimal {
+  --primary: #222222;
+  --accent: #d1d5db; /* Tailwind grey‑300 */
+  --bg:     #ffffff;
+}
+
+/* 2. Coastal Blue  (inspired by NZ’s coastline) */
+.invoice.theme-coastal {
+  --primary: #062e4b; /* deep kaumoana */
+  --accent: #b9d6e2; /* foam blue */
+  --bg:     #f7fbfd; /* sea‑spray white */
+}
+
+/* 3. Forest Green  (Aotearoa ngahere) */
+.invoice.theme-forest {
+  --primary: #143d14;
+  --accent: #cfe6cf;
+  --bg:     #fbfefb;
+}
+
+/* 4. Bold Amber  (Bright, energetic) */
+.invoice.theme-amber {
+  --primary: #3d2b00;
+  --accent: #ffbf00;
+  --bg:     #fffaf0;
+}
+
+/* 5. Charcoal & Coral (Modern punch) */
+.invoice.theme-coral {
+  --primary: #202020;
+  --accent: #ff6f61;
+  --bg:     #ffffff;
+}
+
+/* ---------- Media Queries ---------- */
+@media (max-width: 640px) {
+  .invoice {
+    padding: 1.25rem;
+  }
+  .invoice h1 {
+    font-size: 1.375rem;
+  }
+  .invoice thead { display:none; } /* Stack rows on small screens */
+  .invoice tr {
+    display: grid;
+    grid-template-columns: 4fr 1fr 1fr;
+    gap: 0.25rem;
+  }
+  .invoice tr td[data-label]:before {
+    content: attr(data-label) "\00a0"; /* label + non‑breaking space */
+    font-weight: 600;
+  }
+}
