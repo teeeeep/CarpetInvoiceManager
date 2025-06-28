@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Install system dependencies for WeasyPrint
 RUN apt-get update && apt-get install -y \
+    curl \
     wkhtmltopdf \
     libcairo2-dev \
     libpango-1.0-0 \
@@ -15,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     shared-mime-info \
     fonts-liberation \
     fonts-dejavu-core \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy application files
