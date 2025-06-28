@@ -40,10 +40,10 @@ primary_region = "syd"  # Sydney region for New Zealand users
   url_prefix = "/static/"
 
 # Secrets that need to be set:
-# fly secrets set SESSION_SECRET=your-secret-key-here
-# fly secrets set ADMIN_USERNAME=admin
-# fly secrets set ADMIN_PASSWORD=your-secure-password
-# fly secrets set DATABASE_URL=sqlite:////app/data/carpet_invoices.db
+fly secrets set SESSION_SECRET=$(openssl rand -base64 32)
+fly secrets set ADMIN_USERNAME=admin
+fly secrets set ADMIN_PASSWORD=greenlight24
+fly secrets set DATABASE_URL=sqlite:////app/data/carpet_invoices.db
 
 [deploy]
   release_command = "python -c 'from app import app, db; app.app_context().push(); db.create_all()'"

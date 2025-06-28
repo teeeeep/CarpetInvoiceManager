@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     shared-mime-info \
     fonts-liberation \
     fonts-dejavu-core \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy application files
