@@ -76,14 +76,14 @@ def generate_invoice_code(invoice_id, street_address, retailer_name, homeowner_n
     # Get retailer initials (first 2 letters)
     retailer_initials = ''.join(re.findall(r'[A-Za-z]', retailer_name))[:2].upper()
     if len(retailer_initials) < 2:
-        retailer_initials = retailer_initials.ljust(2, 'X')  # Pad with X if less than 2 letters
+        retailer_initials = retailer_initials.ljust(2, 'x')  # Pad with X if less than 2 letters
 
     # Get homeowner initials (first letter of first name and first letter of last name)
     homeowner_parts = homeowner_name.strip().split()
     if len(homeowner_parts) >= 2:
         homeowner_initials = f"{homeowner_parts[0][0]}{homeowner_parts[-1][0]}".upper()
     elif len(homeowner_parts) == 1:
-        homeowner_initials = f"{homeowner_parts[0][0]}X".upper()  # Pad with X if only one name
+        homeowner_initials = f"{homeowner_parts[0][0]}x".upper()  # Pad with X if only one name
     else:
         homeowner_initials = "XX"
 
