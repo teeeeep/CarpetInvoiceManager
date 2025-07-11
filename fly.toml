@@ -5,8 +5,6 @@ app = "carpet-invoices"
 primary_region = "syd"
 
 [build]
-  # Specify the Dockerfile to use for building the container
-  dockerfile = "Dockerfile"
 
 [env]
   # Set Flask environment and port for the app to bind to
