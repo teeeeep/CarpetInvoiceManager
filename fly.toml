@@ -1,7 +1,8 @@
 # Name of the Fly app (must be unique across fly.io)
 app = "carpet-invoices"
 
-# Primary region for deployment\ nprimary_region = "syd"
+# Primary region for deployment
+primary_region = "syd"
 
 [build]
   # Specify the Dockerfile to use for building the container
